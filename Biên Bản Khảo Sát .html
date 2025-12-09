@@ -10,7 +10,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biên Bản Khảo Sát Giếng Thang</title>
-    <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Thiết lập font Inter */
@@ -257,43 +256,35 @@
 <body class="p-0 sm:p-4" onload="loadState()">
 
     <div class="report-container">
-        <!-- HEADER -->
         <header class="text-center mb-6 border-b-2 border-blue-500 pb-3 page-break-avoid-section">
-            <!-- Yêu cầu 1: Sửa tiêu đề -->
             <h1 class="text-2xl font-extrabold text-blue-800">BIÊN BẢN KHẢO SÁT & KIỂM TRA HIỆN TRANG GIẾNG THANG</h1>
             <h2 class="text-lg font-semibold text-gray-500 mt-1"></h2>
         </header>
 
-        <!-- NÚT IN -->
         <div class="no-print text-center mb-4">
             <button onclick="handlePrintClick()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg text-sm shadow-xl transition duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm2 5a1 1 0 00-1 1v1h10v-1a1 1 0 00-1-1H7zm1-5h4v3H8V4z" clip-rule="evenodd" />
                 </svg>
-                In Biên Bản (A4 pdf)
+                Xuất Biên Bản ra PDF (A4)
             </button>
         </div>
 
-        <!-- THÔNG TIN CHUNG -->
         <div class="mb-6 p-3 bg-blue-50 rounded-md border-l-4 border-blue-500 page-break-avoid-section">
             <h3 class="text-lg font-bold text-blue-700 mb-2">Thông Tin Chung</h3>
             <div class="grid grid-cols-1 gap-y-2 text-sm">
-                <!-- Tên Công trình -->
                 <p class="flex items-start">
                     <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Tên Công trình:</span> 
                     <textarea id="info-project-name" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[Nhà ở Tư nhân]"></textarea>
                 </p>
-                <!-- Địa chỉ -->
                 <p class="flex items-start">
                     <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Địa chỉ:</span> 
                     <textarea id="info-address" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[CLxx-yy KĐT Him Lam...]"></textarea>
                 </p>
 
-                <!-- Hạng mục -->
                 <p class="flex items-start mt-2">
                     <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] whitespace-nowrap flex-shrink-0">Hạng mục:</span> 
                     <div class="relative flex-grow w-full min-w-0">
-                        <!-- Hidden select for actual selection and data -->
                         <select id="info-category" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-20" 
                                 onchange="updateCategoryDisplay(this.value); startSaveTimer()">
                             <option value="Khảo sát giếng thang trước khi ký Hợp đồng">Khảo sát giếng thang trước khi ký Hợp đồng</option>
@@ -303,14 +294,11 @@
                             <option value="Khác">Khác</option>
                         </select>
                         
-                        <!-- Visible display area that handles wrapping (min-h-[28px] ensures minimum height) -->
                         <div id="info-category-display" 
                              class="p-1 border-b border-gray-400 text-sm text-gray-700 cursor-pointer min-h-[28px] leading-snug break-words"
                              onclick="document.getElementById('info-category').focus();">
-                            <!-- Content filled by JS -->
-                        </div>
+                            </div>
 
-                        <!-- Down arrow icon (visual cue) -->
                         <div class="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none z-10">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -319,7 +307,6 @@
                     </div>
                 </p>
                 
-                <!-- Ngày khảo sát -->
                 <p class="flex items-center mt-2">
                     <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Ngày khảo sát:</span> 
                     <input type="date" id="info-date" value="2025-11-28" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="startSaveTimer()">
@@ -328,7 +315,6 @@
             </div>
         </div>
 
-        <!-- PHẦN I: THÀNH PHẦN THAM DỰ -->
         <section class="mb-8 page-break-avoid-section">
             <h3 class="text-xl font-bold text-gray-800 mb-3 border-l-4 border-green-600 pl-3">I. THÀNH PHẦN THAM DỰ</h3>
             <table class="text-gray-700">
@@ -340,11 +326,9 @@
                     </tr>
                 </thead>
                 <tbody id="participants-body">
-                    <!-- Rows will be injected and grouped here by JS (Bên A/B headers) -->
-                </tbody>
+                    </tbody>
             </table>
 
-            <!-- Các nút Thêm/Bỏ người -->
             <div class="flex justify-start space-x-4 mt-2 no-print">
                 <button onclick="addParticipant('A')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-xs shadow-sm transition duration-300 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -361,12 +345,10 @@
             </div>
         </section>
 
-        <!-- PHẦN II: NỘI DUNG KHẢO SÁT HIỆN TRẠNG GIẾNG THANG -->
         <section class="mb-8">
             <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-yellow-600 pl-3 page-break-avoid-section">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
 
-            <!-- 1. Kích thước Giếng Thang -->
-<div class="page-break-after-subsection">
+            <div class="page-break-after-subsection">
                 <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2">1. Kích thước Giếng Thang</h4>
                 <table class="text-gray-700 mb-4 page-break-avoid-row">
                     <thead>
@@ -405,7 +387,6 @@
                     </tbody>
                 </table>
             </div>
-            <!-- 2. Yêu cầu Xây dựng -->
             <div class="page-break-after-subsection">
                 <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2 mt-4">2. Yêu cầu Xây dựng</h4>
                 <table class="text-gray-700 page-break-avoid-row">
@@ -417,7 +398,6 @@
                         </tr>
                     </thead>
                     <tbody id="fixed-survey-body">
-                        <!-- 7 Hạng mục CỐ ĐỊNH -->
                         <tr data-item="xd-damgiuatang">
                             <td>1. Dầm giữa tầng</td>
                             <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Chưa có / Đã có đủ (150x250)"></textarea></td>
@@ -501,10 +481,8 @@
                         </tr>
                     </tbody>
                     <tbody id="custom-survey-body">
-                        <!-- Các hạng mục thêm bởi người dùng sẽ được chèn vào đây -->
-                    </tbody>
+                        </tbody>
                 </table>
-                <!-- Nút thêm hạng mục khác -->
                 <div class="flex justify-start space-x-4 mt-2 no-print">
                     <button onclick="addCustomSurveyItem()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-md text-xs shadow-sm transition duration-300 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -515,7 +493,6 @@
                 </div>
             </div>
 
-            <!-- 3. Nguồn điện -->
             <div class="page-break-after-subsection">
                 <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2 mt-4">3. Nguồn điện</h4>
                 <table class="text-gray-700 page-break-avoid-row">
@@ -527,7 +504,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- 1. Nguồn điện 3 pha -->
                         <tr data-item="pt-dien3pha">
                             <td>1. Nguồn điện 3 Pha (380V)</td>
                             <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có tại phòng máy / Chưa có"></textarea></td>
@@ -544,7 +520,6 @@
             </div>
         </section>
 
-        <!-- PHẦN III: KẾT LUẬN & ĐỀ NGHỊ HÀNH ĐỘNG -->
         <section class="mb-8 p-4 bg-red-100 rounded-md border-l-4 border-red-600 page-break-avoid-section">
             <h3 class="text-xl font-bold text-red-700 mb-3 required-label">III. KẾT LUẬN & ĐỀ NGHỊ THỰC HIỆN</h3>
 
@@ -555,7 +530,6 @@
 
             <div>
                 <h4 class="text-lg font-semibold text-gray-800 mb-1">2. Hạng mục Bắt buộc hoàn thiện:</h4>
-                <!-- Mục này được đảm bảo in do không có class no-print -->
                 <textarea rows="5" id="conclusion-actions" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-700" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="1. Chủ đầu tư cần đục/bổ sung toàn bộ Dầm giữa tầng và Dầm cửa tầng theo kích thước chuẩn 150x250mm.
 2. Tiến hành Chống thấm Hố PIT (Pit) triệt để và bàn giao hiện trạng khô ráo.
 3. Cung cấp Nguồn điện 3 Pha (380V) tại Phòng máy (tầng tum) trước ngày [Ngày tháng].
@@ -563,7 +537,6 @@
             </div>
         </section>
 
-        <!-- PHẦN IV: XÁC NHẬN CỦA CÁC BÊN -->
         <section class="page-break-avoid-section">
             <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-blue-600 pl-3">IV. XÁC NHẬN CỦA CÁC BÊN</h3>
             <table class="signature-table w-full text-gray-800">
@@ -578,25 +551,20 @@
                         <td class="font-normal text-xs italic text-center p-2 no-print" colspan="2">(Sử dụng chuột, bút cảm ứng hoặc ngón tay để ký vào ô bên trên. **Không bắt buộc ký cả hai bên để in**)</td>
                     </tr>
                     <tr>
-                        <!-- Khu vực chữ ký Bên A (Canvas) -->
                         <td class="pt-2 pb-2 border-r-2 border-dashed border-gray-300 relative h-40">
                             <canvas id="signatureA" class="w-full h-full border border-gray-300 rounded-md"></canvas>
                             <button onclick="clearCanvas('signatureA'); startSaveTimer()" class="no-print absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 text-xs text-gray-700 py-1 px-2 rounded-md transition">Xóa Ký</button>
                         </td>
-                        <!-- Khu vực chữ ký Bên B (Canvas) -->
                         <td class="pt-2 pb-2 relative h-40">
                             <canvas id="signatureB" class="w-full h-full border border-gray-300 rounded-md"></canvas>
                             <button onclick="clearCanvas('signatureB'); startSaveTimer()" class="no-print absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 text-xs text-gray-700 py-1 px-2 rounded-md transition">Xóa Ký</button>
                         </td>
                     </tr>
-                    <!-- Dòng nhập Tên (Căn chỉnh line chân nội dung) -->
                     <tr>
                         <td class="pt-2 pb-1 border-r-2 border-dashed border-gray-300 text-center text-sm font-semibold">
-                            <!-- Input duy nhất cho Họ và Tên Bên A -->
                             <input type="text" id="signature-name-A" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" placeholder="[Họ và Tên Bên A]">
                         </td>
                         <td class="pt-2 pb-1 text-center text-sm font-semibold">
-                            <!-- Input duy nhất cho Họ và Tên Bên B -->
                             <input type="text" id="signature-name-B" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" placeholder="[Họ và Tên Bên B]">
                         </td>
                     </tr>
@@ -609,7 +577,6 @@
         </footer>
     </div>
     
-    <!-- Thông báo tự động lưu / Lỗi -->
     <div id="save-status" class="success"></div>
     
 
@@ -809,8 +776,14 @@
             }, duration);
         }
         
-        // --- CHỨC NĂNG IN VÀ VALIDATION (GIỮ NGUYÊN) ---
+        // --- CHỨC NĂNG IN VÀ VALIDATION ---
         
+        // Function to check if the device is running iOS (NEW)
+        function isIOS() {
+            // Kiểm tra các từ khóa User Agent phổ biến trên iOS/Safari
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
         // Hàm kiểm tra các trường bắt buộc
         function validateBeforePrint() {
             let isValid = true;
@@ -845,7 +818,7 @@
             return isValid;
         }
 
-        // Hàm xử lý in
+        // Hàm xử lý in (UPDATED)
         function handlePrintClick() {
             // 1. Kiểm tra các trường bắt buộc
             if (!validateBeforePrint()) {
@@ -854,6 +827,11 @@
             
             // 2. Gọi lệnh in native của trình duyệt
             window.print();
+            
+            // 3. (Mới) Hiển thị hướng dẫn cụ thể cho iOS/Safari sau khi hộp thoại Print bật lên
+            if (isIOS()) {
+                showSaveStatus('TRÊN IOS: Trong màn hình Print, chọn "Lưu vào Tệp" (Save to Files) để tạo PDF.', 'success', 8000);
+            }
         }
 
         // --- CÁC HÀM UTILITY KHÁC (GIỮ NGUYÊN) ---
@@ -895,13 +873,11 @@
                 const inputHandler = `adjustTextareaHeight(this); updateParticipant(${p.id}, `;
                 const rowHTML = `
                     <td>
-                        <!-- Đã loại bỏ p-1 để dùng style chung (padding: 2px 0px) giúp căn chỉnh đường kẻ chân -->
                         <textarea rows="1" class="w-full data-input" 
                                   placeholder="${placeholder.name}"
                                   oninput="${inputHandler}'name', this.value); startSaveTimer()">${inputName}</textarea>
                     </td>
                     <td>
-                        <!-- Đã loại bỏ p-1 để dùng style chung (padding: 2px 0px) giúp căn chỉnh đường kẻ chân -->
                         <textarea rows="1" class="w-full data-input" 
                                   placeholder="${placeholder.role}"
                                   oninput="${inputHandler}'role', this.value); startSaveTimer()">${inputRole}</textarea>
@@ -1140,6 +1116,9 @@
                     clientY = e.clientY;
                 }
 
+                // CẬP NHẬT: Ngăn trình duyệt cuộn/zoom khi chạm vào canvas
+                e.preventDefault(); 
+
                 return {
                     x: clientX - rect.left,
                     y: clientY - rect.top
@@ -1147,7 +1126,6 @@
             }
 
             const startDrawing = (e) => {
-                e.preventDefault();
                 isDrawing = true;
                 canvas.classList.remove('input-error'); // Xóa trạng thái lỗi khi bắt đầu ký
                 const { x, y } = getCoords(e);
@@ -1157,7 +1135,6 @@
 
             const draw = (e) => {
                 if (!isDrawing) return;
-                e.preventDefault();
                 const { x, y } = getCoords(e);
                 ctx.lineTo(x, y);
                 ctx.stroke();
@@ -1177,9 +1154,9 @@
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing); 
 
-            // Touch events
-            canvas.addEventListener('touchstart', startDrawing);
-            canvas.addEventListener('touchmove', draw);
+            // Touch events (ĐÃ BỎ e.preventDefault() ở đây vì đã chuyển vào getCoords() để tránh chặn các sự kiện touch khác)
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDrawing);
             canvas.addEventListener('touchcancel', stopDrawing);
         }
@@ -1202,4 +1179,3 @@
     </script>
 </body>
 </html>
-
