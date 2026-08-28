@@ -81,7 +81,7 @@
             justify-content: center;
             min-width: 64px;
             padding: 6px 10px;
-            border-radius: 999px;
+            border-radius: 8px; /* đồng bộ bo góc với .status-btn */
             font-weight: 800;
             font-size: 0.85rem;
             font-variant-numeric: tabular-nums;
@@ -90,6 +90,49 @@
         .dev-zero  { color: var(--c-success); background: rgba(5,150,105,0.1); }
         .dev-pos   { color: var(--c-primary); background: rgba(29,78,216,0.1); }
         .dev-neg   { color: var(--c-danger);  background: rgba(220,38,38,0.12); }
+
+        /* ============ Thẻ nổi (phân lớp nhẹ, không thêm màu mới) ============ */
+        .sub-card {
+            background: #fff;
+            border: 1px solid var(--c-line);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.05), 0 1px 2px rgba(15,23,42,0.03);
+        }
+
+        /* ============ Pill thông tin nhanh dưới tiêu đề ============ */
+        .header-pill {
+            display: inline-flex; align-items: center;
+            padding: 4px 12px; border-radius: 999px;
+            background: var(--c-bg-soft); color: var(--c-muted);
+            font-size: 0.72rem; font-weight: 700; letter-spacing: .01em;
+            border: 1px solid var(--c-line);
+        }
+
+        /* ============ Nút In dạng icon nổi, gọn ============ */
+        .print-fab {
+            position: fixed;
+            top: calc(14px + env(safe-area-inset-top));
+            right: calc(14px + env(safe-area-inset-right));
+            width: 44px; height: 44px;
+            border-radius: 999px;
+            background: var(--c-primary);
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(29,78,216,0.35);
+            z-index: 900;
+            transition: all .15s ease;
+            border: none; cursor: pointer;
+        }
+        .print-fab:hover, .print-fab:focus-visible { background: var(--c-primary-dark); transform: translateY(-1px); }
+        .print-fab::after {
+            content: 'Xuất PDF';
+            position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%);
+            background: var(--c-ink); color: #fff; font-size: 0.7rem; font-weight: 700;
+            padding: 4px 9px; border-radius: 6px; white-space: nowrap;
+            opacity: 0; pointer-events: none; transition: opacity .15s ease;
+        }
+        .print-fab:hover::after, .print-fab:focus-visible::after { opacity: 1; }
 
         /* ============ Bảng dữ liệu ============ */
         table.data-table {
@@ -165,6 +208,30 @@
             table.responsive-table td.no-mobile-label { font-weight: 700; }
             table.responsive-table td.no-mobile-label::before { content: none; }
             .status-btn { font-size: 0.78rem; min-height: 44px; }
+
+            /* ---- Bảng thông số (Kích thước / Cao độ Tầng): gộp HĐ + Thực tế vào 2 cột trên mobile ---- */
+            table.grid-2col-table tbody tr,
+            table.grid-2col-table tfoot tr {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0;
+                margin-bottom: 12px;
+                border: 1px solid var(--c-line);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            table.grid-2col-table tr td { border-bottom: none; padding: 8px 10px; }
+            table.grid-2col-table tr td:nth-child(1) {
+                grid-column: 1 / -1; background: var(--c-bg-soft);
+                border-bottom: 1px solid var(--c-line); font-weight: 700;
+            }
+            table.grid-2col-table tr td:nth-child(2) {
+                grid-column: 1; border-right: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line);
+            }
+            table.grid-2col-table tr td:nth-child(3) { grid-column: 2; border-bottom: 1px solid var(--c-line); }
+            table.grid-2col-table tr td:nth-child(4) { grid-column: 1 / -1; text-align: center; padding-top: 10px; padding-bottom: 10px; }
+            table.grid-2col-table tr td:nth-child(4) .deviation-output { width: 100%; }
+            table.grid-2col-table tr td:nth-child(5) { grid-column: 1 / -1; border-top: 1px solid var(--c-line); text-align: center; }
         }
 
         @media print {
@@ -189,26 +256,29 @@
             .signature-table td:first-child { border-right: 0.5px dashed #d1d5db !important; }
             .deviation-output { padding: 2px 6px !important; }
             canvas { border: 0.5px solid #000 !important; }
+            .print-fab { display: none !important; }
+            .sub-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
         }
     </style>
 </head>
 <body class="p-0 sm:p-4">
 
     <div class="report-container">
-        <header class="text-center mb-6 border-b-2 pb-3 page-break-avoid-section" style="border-color: var(--c-primary);">
+        <button onclick="handlePrintClick()" class="no-print print-fab" title="Xuất Biên Bản ra PDF" aria-label="Xuất Biên Bản ra PDF">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm2 5a1 1 0 00-1 1v1h10v-1a1 1 0 00-1-1H7zm1-5h4v3H8V4z" clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <header class="text-center mb-7 pb-4 page-break-avoid-section" style="border-bottom: 2px solid var(--c-primary);">
             <h1 class="text-xl sm:text-2xl font-extrabold" style="color: var(--c-primary-dark);">BIÊN BẢN KHẢO SÁT &amp; KIỂM TRA HIỆN TRẠNG GIẾNG THANG</h1>
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-3 no-print">
+                <span class="header-pill" id="header-pill-code">Mã BB: —</span>
+                <span class="header-pill" id="header-pill-date">Ngày: —</span>
+            </div>
         </header>
 
-        <div class="no-print text-center mb-4">
-            <button onclick="handlePrintClick()" class="action-btn btn-primary w-full sm:w-auto shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm2 5a1 1 0 00-1 1v1h10v-1a1 1 0 00-1-1H7zm1-5h4v3H8V4z" clip-rule="evenodd" />
-                </svg>
-                Xuất Biên Bản ra PDF (A4)
-            </button>
-        </div>
-
-        <div class="mb-6 p-3 rounded-md border-l-4 page-break-avoid-section" style="background: var(--c-bg-soft); border-color: var(--c-primary);">
+        <div class="sub-card mb-7 border-l-4 page-break-avoid-section" style="border-left-color: var(--c-primary);">
             <h3 class="text-lg font-bold mb-2" style="color: var(--c-primary-dark);">Thông Tin Chung</h3>
             <div class="grid grid-cols-1 gap-y-2 text-sm">
                 <p class="flex items-start">
@@ -237,13 +307,14 @@
                 </p>
                 <p class="flex items-center mt-2">
                     <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Ngày khảo sát:</span>
-                    <input type="date" id="info-date" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="startSaveTimer()">
+                    <input type="date" id="info-date" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="updateHeaderPills(); startSaveTimer()">
                 </p>
             </div>
         </div>
 
-        <section class="mb-8 page-break-avoid-section">
+        <section class="mb-7 page-break-avoid-section">
             <h3 class="text-xl font-bold mb-3 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);">I. THÀNH PHẦN THAM DỰ</h3>
+            <div class="sub-card">
             <table class="data-table responsive-table">
                 <thead><tr><th class="w-1/2">HỌ VÀ TÊN</th><th class="w-1/3">CHỨC VỤ</th><th class="w-1/12 text-center no-print">Xóa</th></tr></thead>
                 <tbody id="participants-body"></tbody>
@@ -252,14 +323,15 @@
                 <button onclick="addParticipant('A')" class="action-btn btn-outline">+ Thêm Chủ đầu tư (A)</button>
                 <button onclick="addParticipant('B')" class="action-btn btn-ink">+ Thêm Nhà thầu TM (B)</button>
             </div>
+            </div>
         </section>
 
-        <section class="mb-8">
+        <section class="mb-7">
             <h3 class="text-xl font-bold mb-4 border-l-4 pl-3 page-break-avoid-section" style="color: var(--c-ink); border-color: var(--c-primary);">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
 
-            <div class="page-break-after-subsection mb-6">
+            <div class="page-break-after-subsection mb-5 sub-card">
                 <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">1. Kích thước Giếng Thang (mm)</h4>
-                <table class="data-table responsive-table mb-4">
+                <table class="data-table responsive-table grid-2col-table mb-4">
                     <thead><tr><th class="w-[28%]">Hạng mục</th><th class="w-[24%]">Hợp đồng</th><th class="w-[24%]">Thực tế</th><th class="w-[24%]">Độ lệch</th></tr></thead>
                     <tbody>
                         <tr>
@@ -291,7 +363,7 @@
                 <p class="text-xs text-gray-400 mb-4 px-1">* Độ lệch = Thực tế − Hợp đồng. Màu đỏ: thiếu hụt so với hợp đồng (cần lưu ý an toàn hành trình/PIT/OH). Màu xanh dương: dư ra. Màu xanh lá: khớp tuyệt đối.</p>
 
                 <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">Cao độ các Tầng (chiều cao tầng, mm)</h4>
-                <table class="data-table responsive-table" id="floors-table">
+                <table class="data-table responsive-table grid-2col-table" id="floors-table">
                     <thead><tr><th class="w-[28%]">Tầng</th><th class="w-[22%]">Hợp đồng</th><th class="w-[22%]">Thực tế</th><th class="w-[22%]">Độ lệch</th><th class="w-[6%] text-center no-print">Xóa</th></tr></thead>
                     <tbody id="floors-body"></tbody>
                     <tfoot>
@@ -309,7 +381,7 @@
                 </div>
             </div>
 
-            <div class="page-break-after-subsection mb-6">
+            <div class="page-break-after-subsection mb-5 sub-card">
                 <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">2. Yêu cầu Xây dựng</h4>
                 <table class="data-table responsive-table">
                     <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
@@ -403,7 +475,7 @@
                 </div>
             </div>
 
-            <div class="page-break-after-subsection">
+            <div class="page-break-after-subsection sub-card">
                 <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">3. Nguồn điện</h4>
                 <table class="data-table responsive-table">
                     <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
@@ -424,9 +496,9 @@
             </div>
         </section>
 
-        <section class="mb-8 p-4 rounded-md page-break-avoid-section" style="background: var(--c-ink); color: #fff;">
+        <section class="mb-7 p-4 rounded-md page-break-avoid-section" style="background: var(--c-ink); color: #fff;">
             <h3 class="text-xl font-bold mb-3 required-label">III. KẾT LUẬN &amp; ĐỀ NGHỊ THỰC HIỆN</h3>
-            <div class="mb-3">
+            <div class="mb-5">
                 <h4 class="text-base font-semibold mb-1">1. Tình trạng Tổng thể:</h4>
                 <textarea rows="3" id="conclusion-summary" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt."></textarea>
             </div>
@@ -491,6 +563,28 @@
         ];
         let customSurveyItems = [];
         let floors = [ { id: floorIdCounter++, label: 'Tầng 1', hd: '', tt: '' } ];
+        let reportCode = '';
+
+        function generateReportCode(dateStr) {
+            const base = (dateStr || new Date().toISOString().split('T')[0]).replace(/-/g, '');
+            const rand = Math.floor(100 + Math.random() * 900);
+            return `KS-${base}-${rand}`;
+        }
+
+        function updateHeaderPills() {
+            const codeEl = document.getElementById('header-pill-code');
+            const dateEl = document.getElementById('header-pill-date');
+            if (codeEl) codeEl.textContent = `Mã BB: ${reportCode || '—'}`;
+            if (dateEl) {
+                const dateVal = document.getElementById('info-date').value;
+                if (dateVal) {
+                    const [y, m, d] = dateVal.split('-');
+                    dateEl.textContent = `Ngày: ${d}/${m}/${y}`;
+                } else {
+                    dateEl.textContent = 'Ngày: —';
+                }
+            }
+        }
 
         // ============ ĐỘ LỆCH ============
         function formatDeviation(hd, tt) {
@@ -636,6 +730,7 @@
                 signatureB: document.getElementById('signatureB').toDataURL(),
                 signatureNameA: document.getElementById('signature-name-A').value,
                 signatureNameB: document.getElementById('signature-name-B').value,
+                reportCode: reportCode,
             };
 
             try {
@@ -667,6 +762,8 @@
                 updateCategoryDisplay(document.getElementById('info-category').value);
                 initSignatureCanvas('signatureA');
                 initSignatureCanvas('signatureB');
+                reportCode = generateReportCode(today);
+                updateHeaderPills();
                 return;
             }
 
@@ -728,6 +825,9 @@
 
             initSignatureCanvas('signatureA', state.signatureA);
             initSignatureCanvas('signatureB', state.signatureB);
+
+            reportCode = state.reportCode || generateReportCode(state.date || today);
+            updateHeaderPills();
 
             showSaveStatus('Đã khôi phục dữ liệu!', 'success', 3000);
         }
