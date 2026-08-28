@@ -1,268 +1,206 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-        <link rel="manifest" href="./manifest.json">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
-        <meta name="apple-mobile-web-app-title" content="Biên Bản KS"> 
-        <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-        <meta name="theme-color" content="#1d4ed8">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Biên Bản KS">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <meta name="theme-color" content="#1d4ed8">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Biên Bản Khảo Sát Giếng Thang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Thiết lập font Inter */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #eef2ff; /* Màu nền nhẹ nhàng hơn (Light Indigo) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        /* ============ HỆ MÀU: tối đa 4 màu chủ đạo + trung tính ============ */
+        :root {
+            --c-primary: #1d4ed8;       /* Xanh dương - thương hiệu, section, Bên A */
+            --c-primary-dark: #1e3a8a;
+            --c-success: #059669;       /* Xanh lá - Đạt / độ lệch = 0 */
+            --c-danger: #dc2626;        /* Đỏ - Không đạt / độ lệch âm (nguy hiểm) */
+            --c-ink: #0f172a;           /* Slate 900 - chữ chính, Bên B */
+            --c-muted: #64748b;         /* Slate 500 - chữ phụ */
+            --c-line: #e2e8f0;          /* Slate 200 - viền */
+            --c-bg-soft: #f8fafc;       /* Slate 50 - nền phụ */
         }
 
-        /* Tối ưu hóa cho khổ giấy A4 dọc khi in và màn hình nhỏ */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eef2f7;
+            color: var(--c-ink);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
         .report-container {
             max-width: 800px;
             margin: 10px auto;
-            padding: 20px;
+            padding: 16px;
             background-color: #ffffff;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Shadow nổi bật hơn */
-            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+            border-radius: 14px;
         }
+        @media (min-width: 640px) { .report-container { padding: 28px; } }
 
-        /* Thêm dấu hiệu bắt buộc nhập */
-        .required-label:after {
-            content: '*';
-            color: #ef4444; /* red-500 */
-            margin-left: 4px;
-        }
-        
-        /* Hiển thị lỗi khi input rỗng */
-        .input-error {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 1px #ef4444 !important;
-        }
+        .required-label:after { content: '*'; color: var(--c-danger); margin-left: 4px; }
 
-        /* Custom Styles for Interactive Buttons */
+        .input-error { border-color: var(--c-danger) !important; box-shadow: 0 0 0 1px var(--c-danger) !important; border-radius: 4px; }
+
+        /* ============ Nút trạng thái - dạng segmented, ngang, thân thiện chạm ============ */
+        .status-btn-group { display: flex; gap: 6px; width: 100%; }
         .status-btn {
-            padding: 2px 4px; 
-            border-radius: 9999px;
-            font-size: 0.6rem; 
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: 1px solid transparent;
-            width: 55px; 
+            flex: 1;
+            min-height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            line-height: 1.1;
             text-align: center;
+            transition: all .15s ease;
+            cursor: pointer;
+            border: 1.5px solid var(--c-line);
+            background-color: #fff;
+            color: var(--c-muted);
+            user-select: none;
         }
-        .status-btn:not(.active) {
-            opacity: 0.7;
-            background-color: #e5e7eb;
-            color: #4b5563;
+        .status-btn.pass.active { background-color: var(--c-success); color: #fff; border-color: var(--c-success); }
+        .status-btn.fail.active { background-color: var(--c-danger); color: #fff; border-color: var(--c-danger); }
+        .status-btn.na.active   { background-color: var(--c-ink);    color: #fff; border-color: var(--c-ink); }
+
+        /* ============ Chip hiển thị Độ Lệch ============ */
+        .deviation-output {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 64px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            font-variant-numeric: tabular-nums;
         }
-        /* Active States */
-        .status-btn.pass.active { background-color: #10b981; color: white; border-color: #059669; } /* Emerald */
-        .status-btn.fail.active { background-color: #dc2626; color: white; border-color: #b91c1c; } /* Red */
-        .status-btn.na.active { background-color: #4b5563; color: white; border-color: #374151; } /* Gray */
+        .dev-empty { color: #94a3b8; background: var(--c-bg-soft); font-weight: 600; }
+        .dev-zero  { color: var(--c-success); background: rgba(5,150,105,0.1); }
+        .dev-pos   { color: var(--c-primary); background: rgba(29,78,216,0.1); }
+        .dev-neg   { color: var(--c-danger);  background: rgba(220,38,38,0.12); }
 
-
-        /* Table Styles */
-        table {
+        /* ============ Bảng dữ liệu ============ */
+        table.data-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            overflow: hidden;
-            font-size: 0.875rem; 
-        }
-        th, td {
-            padding: 8px 10px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: middle;
-        }
-        th {
-            background-color: #f3f4f6; /* Light Gray */
-            font-weight: 700;
-            color: #4b5563; /* Gray-700 */
-            text-transform: uppercase;
-            font-size: 0.75rem; 
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        /* Input/Textarea Styles: Đảm bảo chỉ có border-bottom và không có padding ngang để căn chỉnh tốt hơn */
-        textarea {
-            padding: 2px 0px;
-            font-size: 0.875rem;
-            border: none;
-            border-bottom: 1px solid #d1d5db;
-            background-color: transparent;
-            resize: none; 
-            overflow-y: hidden; 
-            width: 100%; /* Ensure it fills the TD fully */
-            display: block;
-        }
-        input[type="text"], input[type="date"] {
-            padding: 2px 0px;
-            font-size: 0.875rem;
-            border: none;
-            border-bottom: 1px solid #d1d5db;
-            background-color: transparent;
-        }
-        /* Style cho textarea trong Phần III cần padding */
-        #conclusion-summary, #conclusion-actions {
-            padding: 8px !important;
-        }
-        select {
-             border-color: #d1d5db;
-             padding: 2px;
-             border-radius: 4px;
-        }
-        #info-category-display {
-            line-height: 1.35;
-        }
-
-
-        /* Vùng hiển thị trạng thái khi in */
-        .print-status-text {
-            display: none; 
-            font-weight: 700;
-            font-size: 0.8rem;
-            padding: 2px 0;
-            text-align: center;
-        }
-
-        /* Thẻ thông báo tự động lưu / lỗi */
-        #save-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-            padding: 10px 15px;
+            border: 1px solid var(--c-line);
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, background-color 0.3s;
+            overflow: hidden;
             font-size: 0.875rem;
-            font-weight: 600;
-            z-index: 1000;
         }
-        /* Style cho trạng thái thành công/lỗi */
-        #save-status.success { background-color: #10b981; } /* emerald-500 */
-        #save-status.error { background-color: #ef4444; }   /* red-500 */
-        
-        /* Print Media Query for A4 */
+        table.data-table th, table.data-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--c-line); vertical-align: middle; }
+        table.data-table th { background-color: var(--c-bg-soft); font-weight: 700; color: var(--c-muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: .02em; }
+        table.data-table tr:last-child td { border-bottom: none; }
+        table.data-table tfoot td { background-color: var(--c-bg-soft); font-weight: 800; }
+
+        textarea {
+            padding: 4px 0; font-size: 0.9rem; border: none; border-bottom: 1px solid var(--c-line);
+            background-color: transparent; resize: none; overflow-y: hidden; width: 100%; display: block;
+        }
+        input[type="text"], input[type="date"], input[type="number"] {
+            padding: 6px 4px; font-size: 16px; /* 16px chặn iOS auto-zoom khi focus */
+            border: none; border-bottom: 1px solid var(--c-line); background-color: transparent; width: 100%;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        select { border-color: var(--c-line); padding: 2px; border-radius: 4px; }
+        #info-category-display { line-height: 1.35; }
+
+        .row-delete-btn {
+            min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center;
+            color: var(--c-muted); border-radius: 999px; transition: all .15s;
+        }
+        .row-delete-btn:hover { color: var(--c-danger); background: rgba(220,38,38,0.08); }
+
+        .action-btn {
+            min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 700; border-radius: 10px; font-size: 0.8rem; padding: 8px 16px;
+            transition: all .15s ease;
+        }
+        .btn-primary { background-color: var(--c-primary); color: #fff; }
+        .btn-primary:hover { background-color: var(--c-primary-dark); }
+        .btn-outline { background-color: #fff; color: var(--c-primary); border: 1.5px solid var(--c-primary); }
+        .btn-outline:hover { background-color: rgba(29,78,216,0.06); }
+        .btn-ink { background-color: var(--c-ink); color: #fff; }
+        .btn-ink:hover { background-color: #1e293b; }
+
+        #save-status {
+            position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); right: 16px; left: 16px; max-width: 380px; margin-left: auto;
+            color: white; padding: 12px 16px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            opacity: 0; transition: opacity .4s ease; font-size: 0.85rem; font-weight: 600; z-index: 1000; pointer-events: none;
+        }
+        #save-status.success { background-color: var(--c-success); }
+        #save-status.error { background-color: var(--c-danger); }
+
+        /* ============ RESPONSIVE TABLE: gập bảng thành thẻ trên màn hình nhỏ ============ */
+        @media screen and (max-width: 680px) {
+            table.responsive-table thead { display: none; }
+            table.responsive-table, table.responsive-table tbody, table.responsive-table tfoot,
+            table.responsive-table tr, table.responsive-table td { display: block; width: 100%; }
+            table.responsive-table { border: none; }
+            table.responsive-table tr {
+                margin-bottom: 12px; border: 1px solid var(--c-line); border-radius: 10px; overflow: hidden; background: #fff;
+            }
+            table.responsive-table tfoot tr { background: var(--c-bg-soft); }
+            table.responsive-table td { border-bottom: 1px solid var(--c-line); padding: 10px 12px; }
+            table.responsive-table tr td:last-child { border-bottom: none; }
+            table.responsive-table td[data-label]::before {
+                content: attr(data-label);
+                display: block; font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+                color: var(--c-muted); letter-spacing: .03em; margin-bottom: 4px;
+            }
+            table.responsive-table td.no-mobile-label { font-weight: 700; }
+            table.responsive-table td.no-mobile-label::before { content: none; }
+            .status-btn { font-size: 0.78rem; min-height: 44px; }
+        }
+
         @media print {
-            body {
-                background-color: #ffffff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .report-container {
-                width: 210mm;
-                max-width: 210mm;
-                margin: 0;
-                padding: 10mm;
-                box-shadow: none !important;
-                border-radius: 0;
-            }
-            .page-break-avoid-section {
-                page-break-inside: avoid;
-            }
-            .page-break-after-subsection {
-                page-break-after: auto;
-            }
-
-            /* Hide print button and interactive elements */
-            .no-print {
-                display: none !important;
-            }
-            
-            /* --- Yêu cầu 5: Giảm độ dày nét in xuống 80% (sử dụng 0.5px) --- */
-            input[type="text"], input[type="date"], textarea:not(#conclusion-summary):not(#conclusion-actions), #info-category-display {
+            body { background-color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .report-container { width: 210mm; max-width: 210mm; margin: 0; padding: 10mm; box-shadow: none !important; border-radius: 0; }
+            .page-break-avoid-section { page-break-inside: avoid; }
+            .no-print { display: none !important; }
+            table.responsive-table thead { display: table-header-group !important; }
+            table.responsive-table, table.responsive-table tbody, table.responsive-table tr, table.responsive-table td { display: revert; width: revert; }
+            table.responsive-table tr { margin-bottom: 0; border: none; border-radius: 0; }
+            table.responsive-table td[data-label]::before { content: none !important; }
+            input[type="text"], input[type="date"], input[type="number"], textarea:not(#conclusion-summary):not(#conclusion-actions), #info-category-display {
                 border-bottom: 0.5px solid #000 !important;
-                resize: none !important; 
             }
-            
-            /* Cần thêm lại border cho các textarea không dùng làm đường kẻ chân */
-            #conclusion-summary, #conclusion-actions {
-                 border: 0.5px solid #000 !important;
-                 border-radius: 4px !important;
-            }
-
-            /* Table borders */
-            table {
-                border: 0.5px solid #d1d5db !important; /* Outer table border */
-                border-radius: 0 !important;
-            }
-            th, td {
-                border-bottom: 0.5px solid #e5e7eb !important; /* Inner row border */
-                /* Đảm bảo padding không thay đổi quá nhiều */
-                padding: 6px 8px !important; 
-            }
-            /* End of Yêu cầu 5 */
-
-
-            /* Ensure textareas show all content by preventing overflow */
-            textarea {
-                overflow: visible !important;
-            }
-            /* Hide the actual select field used for data */
-            #info-category {
-                 display: none !important;
-            }
-            /* Fix select display border on print */
-            #info-category-display {
-                appearance: none;
-                border: none !important;
-                padding: 0 !important;
-                font-size: 0.875rem;
-                font-weight: 600; 
-                min-height: unset !important;
-            }
-
-            /* Signature area border for printing */
-            .signature-table td {
-                border: none !important;
-            }
-            /* Adjust the dashed line in signature area (Phần IV) */
-            .signature-table td:first-child {
-                 border-right: 0.5px dashed #d1d5db !important;
-            }
-            /* Hide the interactive button group */
-            .status-btn-group {
-                display: none !important;
-            }
-            /* --- Yêu cầu 3: Căn chỉnh thẩm mỹ cho ĐG --- */
-            /* Show the status text on print */
-            .print-status-text {
-                display: block !important;
-                /* Căn giữa tuyệt đối trong TD */
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 100%; /* Đảm bảo nó không bị cắt */
-            }
-            /* Đảm bảo canvas chữ ký được giữ nguyên khi in */
-            canvas {
-                border: 0.5px solid #000 !important;
-            }
+            #conclusion-summary, #conclusion-actions { border: 0.5px solid #000 !important; border-radius: 4px !important; }
+            table.data-table { border: 0.5px solid #cbd5e1 !important; border-radius: 0 !important; }
+            table.data-table th, table.data-table td { border-bottom: 0.5px solid #e5e7eb !important; padding: 6px 8px !important; }
+            textarea { overflow: visible !important; }
+            #info-category { display: none !important; }
+            #info-category-display { appearance: none; border: none !important; padding: 0 !important; font-weight: 600; min-height: unset !important; }
+            .signature-table td { border: none !important; }
+            .signature-table td:first-child { border-right: 0.5px dashed #d1d5db !important; }
+            .deviation-output { padding: 2px 6px !important; }
+            canvas { border: 0.5px solid #000 !important; }
         }
     </style>
 </head>
-<body class="p-0 sm:p-4" onload="loadState()">
+<body class="p-0 sm:p-4">
 
     <div class="report-container">
-        <header class="text-center mb-6 border-b-2 border-blue-500 pb-3 page-break-avoid-section">
-            <h1 class="text-2xl font-extrabold text-blue-800">BIÊN BẢN KHẢO SÁT & KIỂM TRA HIỆN TRANG GIẾNG THANG</h1>
-            <h2 class="text-lg font-semibold text-gray-500 mt-1"></h2>
+        <header class="text-center mb-6 border-b-2 pb-3 page-break-avoid-section" style="border-color: var(--c-primary);">
+            <h1 class="text-xl sm:text-2xl font-extrabold" style="color: var(--c-primary-dark);">BIÊN BẢN KHẢO SÁT &amp; KIỂM TRA HIỆN TRẠNG GIẾNG THANG</h1>
         </header>
 
         <div class="no-print text-center mb-4">
-            <button onclick="handlePrintClick()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg text-sm shadow-xl transition duration-300">
+            <button onclick="handlePrintClick()" class="action-btn btn-primary w-full sm:w-auto shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm2 5a1 1 0 00-1 1v1h10v-1a1 1 0 00-1-1H7zm1-5h4v3H8V4z" clip-rule="evenodd" />
                 </svg>
@@ -270,249 +208,215 @@
             </button>
         </div>
 
-        <div class="mb-6 p-3 bg-blue-50 rounded-md border-l-4 border-blue-500 page-break-avoid-section">
-            <h3 class="text-lg font-bold text-blue-700 mb-2">Thông Tin Chung</h3>
+        <div class="mb-6 p-3 rounded-md border-l-4 page-break-avoid-section" style="background: var(--c-bg-soft); border-color: var(--c-primary);">
+            <h3 class="text-lg font-bold mb-2" style="color: var(--c-primary-dark);">Thông Tin Chung</h3>
             <div class="grid grid-cols-1 gap-y-2 text-sm">
                 <p class="flex items-start">
-                    <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Tên Công trình:</span> 
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Tên Công trình:</span>
                     <textarea id="info-project-name" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[Nhà ở Tư nhân]"></textarea>
                 </p>
                 <p class="flex items-start">
-                    <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Địa chỉ:</span> 
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Địa chỉ:</span>
                     <textarea id="info-address" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[CLxx-yy KĐT Him Lam...]"></textarea>
                 </p>
-
                 <p class="flex items-start mt-2">
-                    <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] whitespace-nowrap flex-shrink-0">Hạng mục:</span> 
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] whitespace-nowrap flex-shrink-0">Hạng mục:</span>
                     <div class="relative flex-grow w-full min-w-0">
-                        <select id="info-category" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-20" 
-                                onchange="updateCategoryDisplay(this.value); startSaveTimer()">
+                        <select id="info-category" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-20" onchange="updateCategoryDisplay(this.value); startSaveTimer()">
                             <option value="Khảo sát giếng thang trước khi ký Hợp đồng">Khảo sát giếng thang trước khi ký Hợp đồng</option>
                             <option value="Khảo sát giếng thang sau khi ký Hợp đồng">Khảo sát giếng thang sau khi ký Hợp đồng</option>
                             <option value="Khảo sát điều kiện cho Hàng về Công trình">Khảo sát điều kiện cho Hàng về Công trình</option>
                             <option value="Khảo sát cải tạo, thay thế thang máy">Khảo sát cải tạo, thay thế thang máy</option>
                             <option value="Khác">Khác</option>
                         </select>
-                        
-                        <div id="info-category-display" 
-                             class="p-1 border-b border-gray-400 text-sm text-gray-700 cursor-pointer min-h-[28px] leading-snug break-words"
-                             onclick="document.getElementById('info-category').focus();">
-                            </div>
-
+                        <div id="info-category-display" class="p-1 border-b border-gray-400 text-sm text-gray-700 cursor-pointer min-h-[28px] leading-snug break-words" onclick="document.getElementById('info-category').focus();"></div>
                         <div class="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
                 </p>
-                
                 <p class="flex items-center mt-2">
-                    <span class="font-semibold text-gray-700 w-1/4 min-w-[120px] flex-shrink-0 required-label">Ngày khảo sát:</span> 
-                    <input type="date" id="info-date" value="2025-11-28" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="startSaveTimer()">
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Ngày khảo sát:</span>
+                    <input type="date" id="info-date" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="startSaveTimer()">
                 </p>
-                
             </div>
         </div>
 
         <section class="mb-8 page-break-avoid-section">
-            <h3 class="text-xl font-bold text-gray-800 mb-3 border-l-4 border-green-600 pl-3">I. THÀNH PHẦN THAM DỰ</h3>
-            <table class="text-gray-700">
-                <thead>
-                    <tr>
-                        <th class="w-1/2">HỌ VÀ TÊN</th>
-                        <th class="w-1/3">CHỨC VỤ</th>
-                        <th class="w-1/12 text-center no-print">Xóa</th>
-                    </tr>
-                </thead>
-                <tbody id="participants-body">
-                    </tbody>
+            <h3 class="text-xl font-bold mb-3 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);">I. THÀNH PHẦN THAM DỰ</h3>
+            <table class="data-table responsive-table">
+                <thead><tr><th class="w-1/2">HỌ VÀ TÊN</th><th class="w-1/3">CHỨC VỤ</th><th class="w-1/12 text-center no-print">Xóa</th></tr></thead>
+                <tbody id="participants-body"></tbody>
             </table>
-
-            <div class="flex justify-start space-x-4 mt-2 no-print">
-                <button onclick="addParticipant('A')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-xs shadow-sm transition duration-300 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Thêm Chủ đầu tư (A)
-                </button>
-                <button onclick="addParticipant('B')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-md text-xs shadow-sm transition duration-300 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Thêm Nhà thầu TM (B)
-                </button>
+            <div class="flex flex-col sm:flex-row gap-2 sm:space-x-3 mt-3 no-print">
+                <button onclick="addParticipant('A')" class="action-btn btn-outline">+ Thêm Chủ đầu tư (A)</button>
+                <button onclick="addParticipant('B')" class="action-btn btn-ink">+ Thêm Nhà thầu TM (B)</button>
             </div>
         </section>
 
         <section class="mb-8">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-yellow-600 pl-3 page-break-avoid-section">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
+            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3 page-break-avoid-section" style="color: var(--c-ink); border-color: var(--c-primary);">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
 
-            <div class="page-break-after-subsection">
-                <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2">1. Kích thước Giếng Thang</h4>
-                <table class="text-gray-700 mb-4 page-break-avoid-row">
-                    <thead>
-                        <tr>
-                            <th class="w-[35%]">KÍCH THƯỚC HỢP ĐỒNG (mm)</th>
-                            <th class="w-[35%]">KÍCH THƯỚC THỰC TẾ (mm)</th>
-                            <th class="w-[30%] text-center">ĐÁNH GIÁ (ĐG)</th>
-                        </tr>
-                    </thead>
+            <div class="page-break-after-subsection mb-6">
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">1. Kích thước Giếng Thang (mm)</h4>
+                <table class="data-table responsive-table mb-4">
+                    <thead><tr><th class="w-[28%]">Hạng mục</th><th class="w-[24%]">Hợp đồng</th><th class="w-[24%]">Thực tế</th><th class="w-[24%]">Độ lệch</th></tr></thead>
                     <tbody>
-                        <tr data-item="kt-kichthuoc">
-                            <td><textarea rows="1" class="data-input w-full border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Ví dụ: 1500 x 1800"></textarea></td>
-                            <td><textarea rows="1" class="data-input w-full border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Ví dụ: 1495 x 1805"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                </div>
-                                <div class="print-status-text"></div>
-                            </td>
-                        </tr>
-                        
-                        <tr data-item="kt-caodotang">
-                            <td colspan="2">
-                                <span class="font-semibold text-gray-700 block mb-1">Cao độ Tầng (PIT-> OH):</span>
-                                <textarea rows="1" class="data-input w-full border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Ví dụ: Tầng 1 (3500mm), Tầng 2-3 (3200mm), Tầng 4 (3000mm)"></textarea>
-                            </td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                </div>
-                                <div class="print-status-text"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="page-break-after-subsection">
-                <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2 mt-4">2. Yêu cầu Xây dựng</h4>
-                <table class="text-gray-700 page-break-avoid-row">
-                    <thead>
                         <tr>
-                            <th class="w-[45%]">HẠNG MỤC</th>
-                            <th class="w-[45%]">TÌNH TRẠNG / THỰC TẾ</th>
-                            <th class="w-[10%] text-center">ĐG</th>
+                            <td class="no-mobile-label" data-label="Hạng mục">Chiều rộng giếng (W)</td>
+                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-W-hd" placeholder="VD: 1500"></td>
+                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-W-tt" placeholder="VD: 1495"></td>
+                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-W-dev">—</span></td>
                         </tr>
-                    </thead>
+                        <tr>
+                            <td class="no-mobile-label" data-label="Hạng mục">Chiều sâu giếng (D)</td>
+                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-D-hd" placeholder="VD: 1800"></td>
+                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-D-tt" placeholder="VD: 1805"></td>
+                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-D-dev">—</span></td>
+                        </tr>
+                        <tr>
+                            <td class="no-mobile-label" data-label="Hạng mục">Chiều sâu hố PIT</td>
+                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-PIT-hd" placeholder="VD: 1400"></td>
+                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-PIT-tt" placeholder="VD: 1350"></td>
+                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-PIT-dev">—</span></td>
+                        </tr>
+                        <tr>
+                            <td class="no-mobile-label" data-label="Hạng mục">Khoảng đỉnh OH (Overhead)</td>
+                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-OH-hd" placeholder="VD: 3900"></td>
+                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-OH-tt" placeholder="VD: 3850"></td>
+                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-OH-dev">—</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs text-gray-400 mb-4 px-1">* Độ lệch = Thực tế − Hợp đồng. Màu đỏ: thiếu hụt so với hợp đồng (cần lưu ý an toàn hành trình/PIT/OH). Màu xanh dương: dư ra. Màu xanh lá: khớp tuyệt đối.</p>
+
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">Cao độ các Tầng (chiều cao tầng, mm)</h4>
+                <table class="data-table responsive-table" id="floors-table">
+                    <thead><tr><th class="w-[28%]">Tầng</th><th class="w-[22%]">Hợp đồng</th><th class="w-[22%]">Thực tế</th><th class="w-[22%]">Độ lệch</th><th class="w-[6%] text-center no-print">Xóa</th></tr></thead>
+                    <tbody id="floors-body"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="no-mobile-label" data-label="Tổng">TỔNG HÀNH TRÌNH</td>
+                            <td data-label="Hợp đồng (mm)"><span id="floors-total-hd">—</span></td>
+                            <td data-label="Thực tế (mm)"><span id="floors-total-tt">—</span></td>
+                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="floors-total-dev">—</span></td>
+                            <td class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="mt-2 no-print">
+                    <button onclick="addFloor()" class="action-btn btn-outline">+ Thêm Tầng</button>
+                </div>
+            </div>
+
+            <div class="page-break-after-subsection mb-6">
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">2. Yêu cầu Xây dựng</h4>
+                <table class="data-table responsive-table">
+                    <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
                     <tbody id="fixed-survey-body">
-                        <tr data-item="xd-damgiuatang">
-                            <td>1. Dầm giữa tầng</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Chưa có / Đã có đủ (150x250)"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-damgiuatang">
+                            <td class="no-mobile-label" data-label="Hạng mục">1. Dầm giữa tầng</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Chưa có / Đã có đủ (150x250)"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                     <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
-                        <tr data-item="xd-damcua">
-                            <td>2. Dầm cửa tầng</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Kích thước đủ / Thiếu kích thước"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-damcua">
+                            <td class="no-mobile-label" data-label="Hạng mục">2. Dầm cửa tầng</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Kích thước đủ / Thiếu kích thước"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                     <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
-                        <tr data-item="xd-cuagiengthang">
-                            <td>3. Kích thước cửa tầng thang máy</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="W1/WxH/W2"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-cuagiengthang">
+                            <td class="no-mobile-label" data-label="Hạng mục">3. Kích thước cửa tầng thang máy</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="W x H"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
-                        <tr data-item="xd-lochotang">
-                            <td>4. Lỗ chờ lắp hộp gọi tầng</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-lochotang">
+                            <td class="no-mobile-label" data-label="Hạng mục">4. Lỗ chờ lắp hộp gọi tầng</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
-                        <tr data-item="xd-damdatmay">
-                            <td>5. Dầm đặt máy (cho thang có phòng máy)</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
-                                </div>
-                                <div class="print-status-text"></div>
-                            </td>
-                        </tr>
-                        <tr data-item="xd-lochogamdatmay">
-                            <td>6. Lỗ chờ gác dầm đặt máy</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã đục / Đang bịt kín"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-damdatmay">
+                            <td class="no-mobile-label" data-label="Hạng mục">5. Dầm đặt máy (thang có phòng máy)</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                     <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
-                        <tr data-item="pt-chongtham">
-                            <td>7. Hố PIT Thang máy</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã chống thấm / Đang thấm nước"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="xd-lochogamdatmay">
+                            <td class="no-mobile-label" data-label="Hạng mục">6. Lỗ chờ gác dầm đặt máy</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã đục / Đang bịt kín"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
+                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
+                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                                </div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                            </td>
+                        </tr>
+                        <tr class="fixed-item-row" data-item="xd-pitchongtham">
+                            <td class="no-mobile-label" data-label="Hạng mục">7. Hố PIT thang máy (chống thấm)</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã chống thấm / Đang thấm nước"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
                     </tbody>
-                    <tbody id="custom-survey-body">
-                        </tbody>
+                    <tbody id="custom-survey-body"></tbody>
                 </table>
-                <div class="flex justify-start space-x-4 mt-2 no-print">
-                    <button onclick="addCustomSurveyItem()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-md text-xs shadow-sm transition duration-300 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Thêm Hạng Mục Khác
-                    </button>
+                <div class="mt-2 no-print">
+                    <button onclick="addCustomSurveyItem()" class="action-btn" style="background: var(--c-bg-soft); color: var(--c-ink); border: 1.5px solid var(--c-line);">+ Thêm Hạng Mục Khác</button>
                 </div>
             </div>
 
             <div class="page-break-after-subsection">
-                <h4 class="text-lg font-semibold text-gray-700 mb-2 ml-2 mt-4">3. Nguồn điện</h4>
-                <table class="text-gray-700 page-break-avoid-row">
-                    <thead>
-                        <tr>
-                            <th class="w-[45%]">HẠNG MỤC</th>
-                            <th class="w-[45%]">TÌNH TRẠNG / THỰC TẾ</th>
-                            <th class="w-[10%] text-center">ĐG</th>
-                        </tr>
-                    </thead>
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">3. Nguồn điện</h4>
+                <table class="data-table responsive-table">
+                    <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
                     <tbody>
-                        <tr data-item="pt-dien3pha">
-                            <td>1. Nguồn điện 3 Pha (380V)</td>
-                            <td><textarea rows="1" class="data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có tại phòng máy / Chưa có"></textarea></td>
-                            <td class="text-center relative">
-                                <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
+                        <tr class="fixed-item-row" data-item="nd-dien3pha">
+                            <td class="no-mobile-label" data-label="Hạng mục">1. Nguồn điện 3 Pha (380V)</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có tại phòng máy / Chưa có"></textarea></td>
+                            <td data-label="Đánh giá">
+                                <div class="status-btn-group no-print">
                                     <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
                                     <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
                                 </div>
-                                <div class="print-status-text"></div>
+                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
                             </td>
                         </tr>
                     </tbody>
@@ -520,48 +424,43 @@
             </div>
         </section>
 
-        <section class="mb-8 p-4 bg-red-100 rounded-md border-l-4 border-red-600 page-break-avoid-section">
-            <h3 class="text-xl font-bold text-red-700 mb-3 required-label">III. KẾT LUẬN & ĐỀ NGHỊ THỰC HIỆN</h3>
-
+        <section class="mb-8 p-4 rounded-md page-break-avoid-section" style="background: var(--c-ink); color: #fff;">
+            <h3 class="text-xl font-bold mb-3 required-label">III. KẾT LUẬN &amp; ĐỀ NGHỊ THỰC HIỆN</h3>
             <div class="mb-3">
-                <h4 class="text-lg font-semibold text-gray-800 mb-1">1. Tình trạng Tổng thể:</h4>
-                <textarea rows="3" id="conclusion-summary" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-700" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt."></textarea>
+                <h4 class="text-base font-semibold mb-1">1. Tình trạng Tổng thể:</h4>
+                <textarea rows="3" id="conclusion-summary" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt."></textarea>
             </div>
-
             <div>
-                <h4 class="text-lg font-semibold text-gray-800 mb-1">2. Hạng mục Bắt buộc hoàn thiện:</h4>
-                <textarea rows="5" id="conclusion-actions" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-700" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="1. Chủ đầu tư cần đục/bổ sung toàn bộ Dầm giữa tầng và Dầm cửa tầng theo kích thước chuẩn 150x250mm.
-2. Tiến hành Chống thấm Hố PIT (Pit) triệt để và bàn giao hiện trạng khô ráo.
-3. Cung cấp Nguồn điện 3 Pha (380V) tại Phòng máy (tầng tum) trước ngày [Ngày tháng].
-4. Đục lại các lỗ chờ kỹ thuật theo đúng bản vẽ thiết kế để lắp Dầm máy."></textarea>
+                <h4 class="text-base font-semibold mb-1">2. Hạng mục Bắt buộc hoàn thiện:</h4>
+                <textarea rows="5" id="conclusion-actions" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="1. Chủ đầu tư cần đục/bổ sung toàn bộ Dầm giữa tầng và Dầm cửa tầng theo kích thước chuẩn 150x250mm.
+2. Tiến hành chống thấm Hố PIT triệt để, bàn giao hiện trạng khô ráo.
+3. Cung cấp Nguồn điện 3 Pha (380V) tại Phòng máy trước ngày [Ngày tháng]."></textarea>
             </div>
         </section>
 
         <section class="page-break-avoid-section">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-blue-600 pl-3">IV. XÁC NHẬN CỦA CÁC BÊN</h3>
-            <table class="signature-table w-full text-gray-800">
+            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);">IV. XÁC NHẬN CỦA CÁC BÊN</h3>
+            <table class="signature-table w-full" style="border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th class="w-1/2 text-center text-base font-bold text-indigo-700 bg-indigo-100 border-r-2 border-dashed border-gray-300">ĐẠI DIỆN CHỦ ĐẦU TƯ (BÊN A)</th>
-                        <th class="w-1/2 text-center text-base font-bold text-red-700 bg-red-100">ĐẠI DIỆN NHÀ THẦU TM (BÊN B)</th>
+                        <th class="w-1/2 text-center text-sm font-bold p-2 border-r-2 border-dashed" style="color: var(--c-primary-dark); background: rgba(29,78,216,0.08); border-color: var(--c-line);">ĐẠI DIỆN CHỦ ĐẦU TƯ (BÊN A)</th>
+                        <th class="w-1/2 text-center text-sm font-bold p-2" style="color: var(--c-ink); background: var(--c-bg-soft);">ĐẠI DIỆN NHÀ THẦU TM (BÊN B)</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <tr><td class="font-normal text-xs italic text-center p-2 no-print" colspan="2">(Dùng chuột, bút cảm ứng hoặc ngón tay để ký. Không bắt buộc ký cả hai bên để in)</td></tr>
                     <tr>
-                        <td class="font-normal text-xs italic text-center p-2 no-print" colspan="2">(Sử dụng chuột, bút cảm ứng hoặc ngón tay để ký vào ô bên trên. **Không bắt buộc ký cả hai bên để in**)</td>
-                    </tr>
-                    <tr>
-                        <td class="pt-2 pb-2 border-r-2 border-dashed border-gray-300 relative h-40">
-                            <canvas id="signatureA" class="w-full h-full border border-gray-300 rounded-md"></canvas>
-                            <button onclick="clearCanvas('signatureA'); startSaveTimer()" class="no-print absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 text-xs text-gray-700 py-1 px-2 rounded-md transition">Xóa Ký</button>
+                        <td class="pt-2 pb-2 border-r-2 border-dashed relative h-40" style="border-color: var(--c-line);">
+                            <canvas id="signatureA" class="w-full h-full border rounded-md" style="border-color: var(--c-line);"></canvas>
+                            <button onclick="clearCanvas('signatureA'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition">Xóa Ký</button>
                         </td>
                         <td class="pt-2 pb-2 relative h-40">
-                            <canvas id="signatureB" class="w-full h-full border border-gray-300 rounded-md"></canvas>
-                            <button onclick="clearCanvas('signatureB'); startSaveTimer()" class="no-print absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 text-xs text-gray-700 py-1 px-2 rounded-md transition">Xóa Ký</button>
+                            <canvas id="signatureB" class="w-full h-full border rounded-md" style="border-color: var(--c-line);"></canvas>
+                            <button onclick="clearCanvas('signatureB'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition">Xóa Ký</button>
                         </td>
                     </tr>
                     <tr>
-                        <td class="pt-2 pb-1 border-r-2 border-dashed border-gray-300 text-center text-sm font-semibold">
+                        <td class="pt-2 pb-1 border-r-2 border-dashed text-center text-sm font-semibold" style="border-color: var(--c-line);">
                             <input type="text" id="signature-name-A" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" placeholder="[Họ và Tên Bên A]">
                         </td>
                         <td class="pt-2 pb-1 text-center text-sm font-semibold">
@@ -572,90 +471,169 @@
             </table>
         </section>
 
-        <footer class="text-center mt-6 pt-3 border-t text-xs text-gray-500">
+        <footer class="text-center mt-6 pt-3 border-t text-xs" style="color: var(--c-muted); border-color: var(--c-line);">
             *Lưu ý: Biên bản này là căn cứ để theo dõi tiến độ hoàn thiện công trình xây dựng giếng thang máy.
         </footer>
     </div>
-    
+
     <div id="save-status" class="success"></div>
-    
 
     <script>
-        // Tên key dùng để lưu trữ trên localStorage
-        const STORAGE_KEY = 'elevator_survey_report_state';
+        const STORAGE_KEY = 'elevator_survey_report_state_v2';
         let saveTimer;
         let participantIdCounter = 0;
         let customSurveyIdCounter = 0;
-        
-        // Danh sách người tham dự động
+        let floorIdCounter = 0;
+
         let participants = [
-            { id: participantIdCounter++, type: 'A', name: '', role: '' }, 
+            { id: participantIdCounter++, type: 'A', name: '', role: '' },
             { id: participantIdCounter++, type: 'B', name: '', role: '' },
         ];
-
-        // Danh sách hạng mục khảo sát tùy chỉnh
         let customSurveyItems = [];
+        let floors = [ { id: floorIdCounter++, label: 'Tầng 1', hd: '', tt: '' } ];
 
-        // --- CHỨC NĂNG TỰ ĐỘNG LƯU (AUTOSAVE) & THÔNG BÁO ---
-        
-        // Khởi động bộ đếm ngược 10s để lưu
-        function startSaveTimer() {
-            // Loại bỏ class error khi bắt đầu nhập liệu trở lại
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(saveState, 10000); // 10000ms = 10s
+        // ============ ĐỘ LỆCH ============
+        function formatDeviation(hd, tt) {
+            if (hd === '' || tt === '' || hd === undefined || tt === undefined || isNaN(hd) || isNaN(tt)) {
+                return { text: '—', cls: 'dev-empty' };
+            }
+            const diff = Math.round((tt - hd) * 10) / 10;
+            if (diff === 0) return { text: '0', cls: 'dev-zero' };
+            const sign = diff > 0 ? '+' : '';
+            return { text: `${sign}${diff}`, cls: diff > 0 ? 'dev-pos' : 'dev-neg' };
         }
 
-        // Lưu trạng thái hiện tại của toàn bộ form vào localStorage
-        function saveState() {
-            // Lấy dữ liệu của 7 hàng cố định
-            const fixedSurveyData = Array.from(document.querySelectorAll('#fixed-survey-body tr[data-item], table tbody tr[data-item]')).map(row => {
-                    // Lọc các hàng trong #fixed-survey-body, và các hàng data-item khác
-                    if (row.closest('#fixed-survey-body') || row.closest('table').id === null) { 
-                        return {
-                            item: row.getAttribute('data-item'),
-                            inputs: Array.from(row.querySelectorAll('textarea.data-input')).map(input => input.value),
-                            status: row.querySelector('.status-btn.active')?.getAttribute('data-state') || null,
-                        };
-                    }
-                    return null;
-                }).filter(item => item !== null);
-            // Cập nhật customSurveyItems từ DOM trước khi lưu
-            customSurveyItems = Array.from(document.querySelectorAll('#custom-survey-body tr')).map(row => {
-                 const id = parseInt(row.getAttribute('data-id'));
-                 const name = row.querySelector('.item-name-input').value;
-                 const status = row.querySelector('.status-btn.active')?.getAttribute('data-state') || null;
-                 const description = row.querySelector('.description-input').value;
+        function updateDimensionRow(key) {
+            const hdInput = document.getElementById(`dim-${key}-hd`);
+            const ttInput = document.getElementById(`dim-${key}-tt`);
+            const devSpan = document.getElementById(`dim-${key}-dev`);
+            if (!hdInput || !ttInput || !devSpan) return;
+            const hdVal = hdInput.value.trim() === '' ? '' : parseFloat(hdInput.value);
+            const ttVal = ttInput.value.trim() === '' ? '' : parseFloat(ttInput.value);
+            const { text, cls } = formatDeviation(hdVal, ttVal);
+            devSpan.textContent = text;
+            devSpan.className = `deviation-output ${cls}`;
+        }
 
-                 return { id, name, description, status };
+        function bindDimensionListeners() {
+            ['W', 'D', 'PIT', 'OH'].forEach(key => {
+                const hdInput = document.getElementById(`dim-${key}-hd`);
+                const ttInput = document.getElementById(`dim-${key}-tt`);
+                hdInput.addEventListener('input', () => { updateDimensionRow(key); startSaveTimer(); });
+                ttInput.addEventListener('input', () => { updateDimensionRow(key); startSaveTimer(); });
+            });
+        }
+
+        // ============ TẦNG (DYNAMIC) ============
+        function renderFloors() {
+            const tbody = document.getElementById('floors-body');
+            tbody.innerHTML = '';
+            floors.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', f.id);
+                tr.innerHTML = `
+                    <td data-label="Tầng"><input type="text" class="data-input" value="${f.label}" oninput="updateFloor(${f.id}, 'label', this.value); startSaveTimer()"></td>
+                    <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" class="data-input" value="${f.hd}" oninput="updateFloor(${f.id}, 'hd', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
+                    <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" class="data-input" value="${f.tt}" oninput="updateFloor(${f.id}, 'tt', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
+                    <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="floor-dev-${f.id}">—</span></td>
+                    <td class="no-print text-center" data-label="Xóa"><button onclick="removeFloor(${f.id})" class="row-delete-btn" title="Xóa tầng">✕</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            floors.forEach(f => recalcFloorRow(f.id, false));
+            recalcFloorsTotal();
+        }
+
+        function updateFloor(id, key, value) {
+            const f = floors.find(x => x.id === id);
+            if (f) f[key] = value;
+        }
+
+        function recalcFloorRow(id, doTotal = true) {
+            const f = floors.find(x => x.id === id);
+            if (!f) return;
+            const span = document.getElementById(`floor-dev-${id}`);
+            const hd = f.hd === '' ? '' : parseFloat(f.hd);
+            const tt = f.tt === '' ? '' : parseFloat(f.tt);
+            const { text, cls } = formatDeviation(hd, tt);
+            if (span) { span.textContent = text; span.className = `deviation-output ${cls}`; }
+            if (doTotal) recalcFloorsTotal();
+        }
+
+        function recalcFloorsTotal() {
+            let sumHd = 0, sumTt = 0, anyHd = false, anyTt = false;
+            floors.forEach(f => {
+                const hd = parseFloat(f.hd), tt = parseFloat(f.tt);
+                if (!isNaN(hd)) { sumHd += hd; anyHd = true; }
+                if (!isNaN(tt)) { sumTt += tt; anyTt = true; }
+            });
+            document.getElementById('floors-total-hd').textContent = anyHd ? sumHd.toLocaleString('vi-VN') : '—';
+            document.getElementById('floors-total-tt').textContent = anyTt ? sumTt.toLocaleString('vi-VN') : '—';
+            const span = document.getElementById('floors-total-dev');
+            if (anyHd && anyTt) {
+                const { text, cls } = formatDeviation(sumHd, sumTt);
+                span.textContent = text; span.className = `deviation-output ${cls}`;
+            } else {
+                span.textContent = '—'; span.className = 'deviation-output dev-empty';
+            }
+        }
+
+        function addFloor() {
+            floors.push({ id: floorIdCounter++, label: `Tầng ${floors.length + 1}`, hd: '', tt: '' });
+            renderFloors(); startSaveTimer();
+        }
+
+        function removeFloor(id) {
+            if (floors.length <= 1) { showSaveStatus('Phải giữ lại ít nhất một tầng.', 'error', 3000); return; }
+            floors = floors.filter(f => f.id !== id);
+            renderFloors(); startSaveTimer();
+        }
+
+        // ============ LƯU / TẢI ============
+        function startSaveTimer() {
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveState, 10000);
+        }
+
+        function saveState() {
+            customSurveyItems = Array.from(document.querySelectorAll('#custom-survey-body tr')).map(row => ({
+                id: parseInt(row.getAttribute('data-id')),
+                name: row.querySelector('.item-name-input').value,
+                description: row.querySelector('.description-input').value,
+                status: row.querySelector('.status-btn.active')?.getAttribute('data-state') || null,
+            }));
+
+            const fixedItems = Array.from(document.querySelectorAll('tr.fixed-item-row')).map(row => ({
+                item: row.getAttribute('data-item'),
+                text: row.querySelector('textarea.data-input')?.value || '',
+                status: row.querySelector('.status-btn.active')?.getAttribute('data-state') || null,
+            }));
+
+            const dimensions = {};
+            ['W', 'D', 'PIT', 'OH'].forEach(k => {
+                dimensions[k] = {
+                    hd: document.getElementById(`dim-${k}-hd`).value,
+                    tt: document.getElementById(`dim-${k}-tt`).value,
+                };
             });
 
-
             const state = {
-                // 1. Thông tin chung
                 projectName: document.getElementById('info-project-name').value,
                 address: document.getElementById('info-address').value,
-                category: document.getElementById('info-category').value, 
+                category: document.getElementById('info-category').value,
                 date: document.getElementById('info-date').value,
-
-                // 2. Thành phần tham dự
-                participants: participants, 
-                
-                // 3. Nội dung khảo sát (Table data & status)
-                fixedSurveyData: fixedSurveyData,
+                participants: participants,
+                dimensions: dimensions,
+                floors: floors,
+                floorIdCounter: floorIdCounter,
+                fixedItems: fixedItems,
                 customSurveyItems: customSurveyItems,
                 customSurveyIdCounter: customSurveyIdCounter,
-
-                // 4. Kết luận
                 conclusionSummary: document.getElementById('conclusion-summary').value,
                 conclusionActions: document.getElementById('conclusion-actions').value,
-
-                // 5. Chữ ký (Canvas images)
                 signatureA: document.getElementById('signatureA').toDataURL(),
                 signatureB: document.getElementById('signatureB').toDataURL(),
-                
-                // 6. Tên người ký
                 signatureNameA: document.getElementById('signature-name-A').value,
                 signatureNameB: document.getElementById('signature-name-B').value,
             };
@@ -664,181 +642,140 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 showSaveStatus('Đã lưu tự động!', 'success');
             } catch (error) {
-                console.error("Lỗi khi lưu trạng thái:", error);
+                console.error('Lỗi khi lưu trạng thái:', error);
                 showSaveStatus('Lỗi khi lưu dữ liệu!', 'error');
             }
         }
 
-        // Tải trạng thái đã lưu từ localStorage
         function loadState() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('info-date').value = today;
+
+            let state = null;
             try {
-                const savedState = localStorage.getItem(STORAGE_KEY);
-                
-                // Set ngày mặc định hôm nay nếu chưa có
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('info-date').value = today;
-                
-                if (!savedState) {
-                    renderParticipants();
-                    initSignatureCanvas('signatureA');
-                    initSignatureCanvas('signatureB');
-                    updateCategoryDisplay(document.getElementById('info-category').value);
-                    return;
-                }
-
-                const state = JSON.parse(savedState);
-                
-                // 1. Thông tin chung
-                document.getElementById('info-project-name').value = state.projectName || '';
-                document.getElementById('info-address').value = state.address || '';
-                
-                const categorySelect = document.getElementById('info-category');
-                const categoryValue = state.category || categorySelect.options[0].value; 
-                categorySelect.value = categoryValue;
-                updateCategoryDisplay(categoryValue); 
-                
-                document.getElementById('info-date').value = state.date || today;
-                
-                // 2. Thành phần tham dự
-                if (state.participants && state.participants.length > 0) {
-                    participants = state.participants; 
-                    participantIdCounter = participants.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-                }
-                renderParticipants();
-                
-                // 3. Nội dung khảo sát (Table data & status) - Cố định
-                // Lưu ý: Cần render trước khi load data
-                document.querySelectorAll('textarea').forEach(adjustTextareaHeight); // Điều chỉnh chiều cao cho các rows mặc định
-                (state.fixedSurveyData || []).forEach(data => {
-                    const row = document.querySelector(`tr[data-item="${data.item}"]`);
-                    if (row) {
-                        Array.from(row.querySelectorAll('textarea.data-input')).forEach((input, index) => {
-                            if (data.inputs && data.inputs[index] !== undefined) {
-                                input.value = data.inputs[index];
-                                adjustTextareaHeight(input);
-                            }
-                        });
-                        if (data.status) {
-                            const button = row.querySelector(`.status-btn[data-state="${data.status}"]`);
-                            if (button) {
-                                const statusType = button.classList.contains('pass') ? 'pass' : (button.classList.contains('fail') ? 'fail' : 'na');
-                                handleSelection(button, statusType, false);
-                            }
-                        }
-                    }
-                });
-
-                // 4. Nội dung khảo sát (Table data & status) - Tùy chỉnh
-                if (state.customSurveyItems) {
-                    customSurveyItems = state.customSurveyItems;
-                    customSurveyIdCounter = state.customSurveyIdCounter || customSurveyItems.reduce((max, i) => Math.max(max, i.id), 0) + 1;
-                    renderCustomSurveyItems(); 
-                }
-
-                // 5. Kết luận
-                document.getElementById('conclusion-summary').value = state.conclusionSummary || '';
-                document.getElementById('conclusion-actions').value = state.conclusionActions || '';
-                
-                // 6. Tên người ký
-                document.getElementById('signature-name-A').value = state.signatureNameA || '';
-                document.getElementById('signature-name-B').value = state.signatureNameB || '';
-
-                // Điều chỉnh chiều cao chung cho tất cả textarea
-                document.querySelectorAll('textarea').forEach(adjustTextareaHeight);
-
-                // 7. Chữ ký (Canvas images)
-                initSignatureCanvas('signatureA', state.signatureA);
-                initSignatureCanvas('signatureB', state.signatureB);
-
-                showSaveStatus('Đã khôi phục dữ liệu!', 'success', 3000);
-
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) state = JSON.parse(saved);
             } catch (error) {
-                console.error("Lỗi khi tải trạng thái:", error);
-                initSignatureCanvas('signatureA');
-                initSignatureCanvas('signatureB');
-                renderParticipants();
+                console.error('Lỗi khi tải trạng thái:', error);
                 showSaveStatus('Lỗi tải dữ liệu. Bắt đầu phiên mới.', 'error', 5000);
             }
+
+            if (!state) {
+                renderParticipants();
+                renderFloors();
+                ['W', 'D', 'PIT', 'OH'].forEach(updateDimensionRow);
+                updateCategoryDisplay(document.getElementById('info-category').value);
+                initSignatureCanvas('signatureA');
+                initSignatureCanvas('signatureB');
+                return;
+            }
+
+            document.getElementById('info-project-name').value = state.projectName || '';
+            document.getElementById('info-address').value = state.address || '';
+            const categorySelect = document.getElementById('info-category');
+            const categoryValue = state.category || categorySelect.options[0].value;
+            categorySelect.value = categoryValue;
+            updateCategoryDisplay(categoryValue);
+            document.getElementById('info-date').value = state.date || today;
+
+            if (state.participants && state.participants.length > 0) {
+                participants = state.participants;
+                participantIdCounter = participants.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+            }
+            renderParticipants();
+
+            if (state.dimensions) {
+                ['W', 'D', 'PIT', 'OH'].forEach(k => {
+                    const d = state.dimensions[k] || {};
+                    document.getElementById(`dim-${k}-hd`).value = d.hd || '';
+                    document.getElementById(`dim-${k}-tt`).value = d.tt || '';
+                });
+            }
+            ['W', 'D', 'PIT', 'OH'].forEach(updateDimensionRow);
+
+            if (state.floors && state.floors.length > 0) {
+                floors = state.floors;
+                floorIdCounter = state.floorIdCounter || (floors.reduce((max, f) => Math.max(max, f.id), 0) + 1);
+            }
+            renderFloors();
+
+            document.querySelectorAll('textarea').forEach(adjustTextareaHeight);
+            (state.fixedItems || []).forEach(data => {
+                const row = document.querySelector(`tr.fixed-item-row[data-item="${data.item}"]`);
+                if (!row) return;
+                const ta = row.querySelector('textarea.data-input');
+                if (ta) { ta.value = data.text || ''; adjustTextareaHeight(ta); }
+                if (data.status) {
+                    const btn = row.querySelector(`.status-btn[data-state="${data.status}"]`);
+                    if (btn) {
+                        const type = btn.classList.contains('pass') ? 'pass' : (btn.classList.contains('fail') ? 'fail' : 'na');
+                        handleSelection(btn, type, false);
+                    }
+                }
+            });
+
+            if (state.customSurveyItems) {
+                customSurveyItems = state.customSurveyItems;
+                customSurveyIdCounter = state.customSurveyIdCounter || (customSurveyItems.reduce((max, i) => Math.max(max, i.id), 0) + 1);
+                renderCustomSurveyItems();
+            }
+
+            document.getElementById('conclusion-summary').value = state.conclusionSummary || '';
+            document.getElementById('conclusion-actions').value = state.conclusionActions || '';
+            document.getElementById('signature-name-A').value = state.signatureNameA || '';
+            document.getElementById('signature-name-B').value = state.signatureNameB || '';
+            document.querySelectorAll('textarea').forEach(adjustTextareaHeight);
+
+            initSignatureCanvas('signatureA', state.signatureA);
+            initSignatureCanvas('signatureB', state.signatureB);
+
+            showSaveStatus('Đã khôi phục dữ liệu!', 'success', 3000);
         }
 
-        // Hiển thị thông báo tự động lưu / lỗi
         function showSaveStatus(message, type = 'success', duration = 2000) {
             const statusDiv = document.getElementById('save-status');
             statusDiv.textContent = message;
-            
-            // Cập nhật màu sắc (success/error)
             statusDiv.classList.remove('success', 'error');
             statusDiv.classList.add(type);
-
             statusDiv.style.opacity = '1';
-            setTimeout(() => {
-                statusDiv.style.opacity = '0';
-            }, duration);
-        }
-        
-        // --- CHỨC NĂNG IN VÀ VALIDATION ---
-        
-        // Function to check if the device is running iOS (NEW)
-        function isIOS() {
-            // Kiểm tra các từ khóa User Agent phổ biến trên iOS/Safari
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            setTimeout(() => { statusDiv.style.opacity = '0'; }, duration);
         }
 
-        // Hàm kiểm tra các trường bắt buộc
+        // ============ IN / PDF ============
+        function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+
         function validateBeforePrint() {
             let isValid = true;
             const errors = [];
-            
             const requiredFields = [
                 { id: 'info-project-name', name: 'Tên Công trình' },
                 { id: 'info-address', name: 'Địa chỉ' },
                 { id: 'info-date', name: 'Ngày khảo sát' },
                 { id: 'conclusion-summary', name: 'Kết luận Tổng thể (III.1)' },
             ];
-            
-            // Xóa hết trạng thái lỗi cũ
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
-                // Dùng .value.trim() cho textarea/input
                 if (element && element.value.trim() === '') {
                     isValid = false;
                     errors.push(field.name);
                     element.classList.add('input-error');
-                    // Focus vào trường lỗi đầu tiên
-                    if (errors.length === 1) { element.focus(); }
+                    if (errors.length === 1) element.focus();
                 }
             });
-
-            if (!isValid) {
-                showSaveStatus(`Vui lòng điền đầy đủ thông tin bắt buộc: ${errors.join(', ')}`, 'error', 10000);
-            }
-            
+            if (!isValid) showSaveStatus(`Vui lòng điền đầy đủ: ${errors.join(', ')}`, 'error', 8000);
             return isValid;
         }
 
-        // Hàm xử lý in (UPDATED)
         function handlePrintClick() {
-            // 1. Kiểm tra các trường bắt buộc
-            if (!validateBeforePrint()) {
-                return;
-            }
-            
-            // 2. Gọi lệnh in native của trình duyệt
+            if (!validateBeforePrint()) return;
             window.print();
-            
-            // 3. (Mới) Hiển thị hướng dẫn cụ thể cho iOS/Safari sau khi hộp thoại Print bật lên
-            if (isIOS()) {
-                showSaveStatus('TRÊN IOS: Trong màn hình Print, chọn "Lưu vào Tệp" (Save to Files) để tạo PDF.', 'success', 8000);
-            }
+            if (isIOS()) showSaveStatus('Trên iOS: chọn "Lưu vào Tệp" (Save to Files) để tạo PDF.', 'success', 7000);
         }
 
-        // --- CÁC HÀM UTILITY KHÁC (GIỮ NGUYÊN) ---
-        
+        // ============ UTILITY ============
         function updateCategoryDisplay(selectedValue) {
-            const displayDiv = document.getElementById('info-category-display');
-            displayDiv.textContent = selectedValue;
+            document.getElementById('info-category-display').textContent = selectedValue;
         }
 
         function adjustTextareaHeight(textarea) {
@@ -846,142 +783,91 @@
             textarea.style.height = (textarea.scrollHeight) + 'px';
         }
 
-        // --- QUẢN LÝ THÀNH PHẦN THAM DỰ ---
+        // ============ THÀNH PHẦN THAM DỰ ============
         function renderParticipants() {
             const tbody = document.getElementById('participants-body');
             if (!tbody) return;
-
-            tbody.innerHTML = ''; 
-
+            tbody.innerHTML = '';
             const participantsA = participants.filter(p => p.type === 'A');
             const participantsB = participants.filter(p => p.type === 'B');
-            
             const defaultPlaceholder = (type) => ({
                 name: type === 'A' ? 'Ví dụ: Nguyễn Văn A' : 'Ví dụ: Trần Thị B',
                 role: type === 'A' ? 'Chủ Nhà/Đại diện CĐT' : 'CBKT Thang máy',
             });
-
             const createParticipantRow = (p) => {
                 const row = document.createElement('tr');
-                row.classList.add('page-break-avoid-row'); 
                 row.setAttribute('data-id', p.id);
-                
                 const placeholder = defaultPlaceholder(p.type);
-                const inputName = p.name || '';
-                const inputRole = p.role || '';
-
                 const inputHandler = `adjustTextareaHeight(this); updateParticipant(${p.id}, `;
-                const rowHTML = `
-                    <td>
-                        <textarea rows="1" class="w-full data-input" 
-                                  placeholder="${placeholder.name}"
-                                  oninput="${inputHandler}'name', this.value); startSaveTimer()">${inputName}</textarea>
-                    </td>
-                    <td>
-                        <textarea rows="1" class="w-full data-input" 
-                                  placeholder="${placeholder.role}"
-                                  oninput="${inputHandler}'role', this.value); startSaveTimer()">${inputRole}</textarea>
-                    </td>
-                    <td class="text-center no-print">
-                        <button onclick="removeParticipant(${p.id})" class="text-gray-500 hover:text-red-600 p-1 rounded-full transition duration-150" title="Xóa người tham dự">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+                row.innerHTML = `
+                    <td data-label="Họ và Tên"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.name}" oninput="${inputHandler}'name', this.value); startSaveTimer()">${p.name || ''}</textarea></td>
+                    <td data-label="Chức vụ"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.role}" oninput="${inputHandler}'role', this.value); startSaveTimer()">${p.role || ''}</textarea></td>
+                    <td class="text-center no-print" data-label="Xóa">
+                        <button onclick="removeParticipant(${p.id})" class="row-delete-btn" title="Xóa người tham dự">✕</button>
                     </td>
                 `;
-                row.innerHTML = rowHTML;
                 return row;
             };
-
             if (participantsA.length > 0) {
                 const headerA = document.createElement('tr');
-                headerA.classList.add('page-break-avoid-row');
-                // Màu sắc hài hòa hơn
-                headerA.innerHTML = `<td colspan="3" class="!p-1 bg-indigo-100 font-bold text-indigo-800 text-sm">Đại diện Chủ đầu tư (BÊN A)</td>`;
+                headerA.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: rgba(29,78,216,0.08); color: var(--c-primary-dark);">Đại diện Chủ đầu tư (BÊN A)</td>`;
                 tbody.appendChild(headerA);
                 participantsA.forEach(p => tbody.appendChild(createParticipantRow(p)));
             }
-
             if (participantsB.length > 0) {
                 const headerB = document.createElement('tr');
-                headerB.classList.add('page-break-avoid-row');
-                 // Màu sắc hài hòa hơn
-                headerB.innerHTML = `<td colspan="3" class="!p-1 bg-red-100 font-bold text-red-800 text-sm">Đại diện Nhà thầu TM (BÊN B)</td>`;
+                headerB.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: var(--c-bg-soft); color: var(--c-ink);">Đại diện Nhà thầu TM (BÊN B)</td>`;
                 tbody.appendChild(headerB);
                 participantsB.forEach(p => tbody.appendChild(createParticipantRow(p)));
             }
-
             tbody.querySelectorAll('textarea').forEach(adjustTextareaHeight);
         }
 
         function addParticipant(type) {
-            const newId = participantIdCounter++;
-            const newParticipant = { id: newId, type: type, name: '', role: '' };
-            participants.push(newParticipant);
-            renderParticipants();
-            startSaveTimer(); 
+            participants.push({ id: participantIdCounter++, type: type, name: '', role: '' });
+            renderParticipants(); startSaveTimer();
         }
 
         function removeParticipant(id) {
-            const participantIndex = participants.findIndex(p => p.id === id);
-            if (participantIndex !== -1) {
-                const participantType = participants[participantIndex].type;
-                const typeCount = participants.filter(p => p.type === participantType).length;
-                if (typeCount <= 1) { 
-                    showSaveStatus('Phải giữ lại ít nhất một đại diện cho mỗi bên.', 'error', 4000);
-                    return; 
-                } 
-                participants = participants.filter(p => p.id !== id);
-                renderParticipants();
-                startSaveTimer();
+            const idx = participants.findIndex(p => p.id === id);
+            if (idx === -1) return;
+            const type = participants[idx].type;
+            if (participants.filter(p => p.type === type).length <= 1) {
+                showSaveStatus('Phải giữ lại ít nhất một đại diện cho mỗi bên.', 'error', 4000);
+                return;
             }
+            participants = participants.filter(p => p.id !== id);
+            renderParticipants(); startSaveTimer();
         }
 
         function updateParticipant(id, key, value) {
-            const participantIndex = participants.findIndex(p => p.id === id);
-            if (participantIndex !== -1) {
-                participants[participantIndex][key] = value;
-            }
+            const p = participants.find(x => x.id === id);
+            if (p) p[key] = value;
         }
-        
-        // --- QUẢN LÝ HẠNG MỤC KHẢO SÁT TÙY CHỈNH (CUSTOM SURVEY) ---
-        
+
+        // ============ HẠNG MỤC TÙY CHỈNH ============
         function renderCustomSurveyItems() {
             const tbody = document.getElementById('custom-survey-body');
             if (!tbody) return;
             tbody.innerHTML = '';
-            
             customSurveyItems.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', item.id);
-                row.classList.add('page-break-avoid-row');
-                
-                const itemNumber = 8 + index; 
-
-                const cellItem = document.createElement('td');
-                cellItem.innerHTML = `<textarea rows="1" class="item-name-input data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'name', this.value);" placeholder="${itemNumber}. [Tên hạng mục tùy chỉnh]">${item.name}</textarea>`;
-                
-                const cellDescription = document.createElement('td');
-                cellDescription.innerHTML = `<textarea rows="1" class="description-input data-input w-full bg-transparent border-b border-gray-300" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'description', this.value);" placeholder="[Mô tả tình trạng thực tế]">${item.description}</textarea>`;
-                
-                const cellStatus = document.createElement('td');
-                cellStatus.classList.add('text-center', 'relative');
-                cellStatus.innerHTML = `
-                    <div class="status-btn-group flex flex-col space-y-1 items-end pr-2 no-print">
-                        <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                        <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                        <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
-                        <button onclick="removeCustomSurveyItem(${item.id})" class="text-xs text-red-500 hover:text-red-700 py-1 px-2 transition" title="Xóa hàng">Xóa</button>
-                    </div>
-                    <div class="print-status-text"></div>
+                const itemNumber = 8 + index;
+                row.innerHTML = `
+                    <td data-label="Hạng mục"><textarea rows="1" class="item-name-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'name', this.value);" placeholder="${itemNumber}. [Tên hạng mục tùy chỉnh]">${item.name || ''}</textarea></td>
+                    <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="description-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'description', this.value);" placeholder="[Mô tả tình trạng thực tế]">${item.description || ''}</textarea></td>
+                    <td data-label="Đánh giá">
+                        <div class="status-btn-group no-print">
+                            <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
+                            <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                            <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                        </div>
+                        <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                        <button onclick="removeCustomSurveyItem(${item.id})" class="no-print text-xs mt-1" style="color: var(--c-danger);">Xóa hàng</button>
+                    </td>
                 `;
-                
-                row.appendChild(cellItem);
-                row.appendChild(cellDescription);
-                row.appendChild(cellStatus);
                 tbody.appendChild(row);
-
                 if (item.status) {
                     const button = row.querySelector(`.status-btn[data-state="${item.status}"]`);
                     if (button) {
@@ -994,167 +880,96 @@
         }
 
         function addCustomSurveyItem() {
-            const newId = customSurveyIdCounter++;
-            const newItem = { id: newId, name: '', description: '', status: null };
-            customSurveyItems.push(newItem);
-            renderCustomSurveyItems();
-            startSaveTimer(); 
+            customSurveyItems.push({ id: customSurveyIdCounter++, name: '', description: '', status: null });
+            renderCustomSurveyItems(); startSaveTimer();
         }
 
         function removeCustomSurveyItem(id) {
             customSurveyItems = customSurveyItems.filter(item => item.id !== id);
-            renderCustomSurveyItems();
-            startSaveTimer(); 
+            renderCustomSurveyItems(); startSaveTimer();
         }
 
         function updateCustomSurveyItem(id, key, value) {
-            const itemIndex = customSurveyItems.findIndex(item => item.id === id);
-            if (itemIndex !== -1) {
-                customSurveyItems[itemIndex][key] = value;
-            }
+            const item = customSurveyItems.find(i => i.id === id);
+            if (item) item[key] = value;
         }
 
-
-        // Hàm xử lý khi nhấn nút Đạt/Không Đạt/K.CÓ
+        // ============ ĐẠT / K.ĐẠT / K.CÓ ============
         function handleSelection(clickedButton, state, shouldSave = true) {
             const row = clickedButton.closest('tr');
             if (!row) return;
-
             const buttons = row.querySelectorAll('.status-btn');
             const wasActive = clickedButton.classList.contains('active');
-            
-            // Luôn xóa trạng thái active của tất cả các nút trong hàng đó
             buttons.forEach(btn => btn.classList.remove('active'));
-
             const cell = clickedButton.closest('td');
             const printStatusText = cell.querySelector('.print-status-text');
-
             if (wasActive) {
-                // --- 1. BỎ CHỌN (Unselect) ---
-                // Xóa trạng thái và chữ in
-                if (printStatusText) {
-                    printStatusText.textContent = '';
-                    printStatusText.className = 'print-status-text'; // Đặt lại class mặc định
-                }
+                if (printStatusText) { printStatusText.textContent = ''; printStatusText.style.color = ''; }
             } else {
-                // --- 2. CHỌN MỚI (Select) ---
                 clickedButton.classList.add('active');
-
                 if (printStatusText) {
-                    const text = clickedButton.getAttribute('data-state');
-                    let colorClass;
-                    if (state === 'pass') {
-                        colorClass = 'text-green-700';
-                    } else if (state === 'fail') {
-                        colorClass = 'text-red-700';
-                    } else { // na
-                        colorClass = 'text-gray-700';
-                    }
-
-                    printStatusText.textContent = text;
-                    printStatusText.className = `print-status-text ${colorClass}`;
+                    printStatusText.textContent = clickedButton.getAttribute('data-state');
+                    printStatusText.style.color = state === 'pass' ? 'var(--c-success)' : (state === 'fail' ? 'var(--c-danger)' : 'var(--c-ink)');
                 }
             }
-            
-            // Luôn gọi startSaveTimer sau mỗi hành động (chọn hoặc bỏ chọn)
-            if (shouldSave) {
-                startSaveTimer(); 
-            }
+            if (shouldSave) startSaveTimer();
         }
-                
-        // --- CHỨC NĂNG CHỮ KÝ (CANVAS) - ĐÃ CẬP NHẬT ĐỘ ĐẬM VÀ MÀU SẮC ---
 
+        // ============ CHỮ KÝ ============
         let isDrawing = false;
-        
         function initSignatureCanvas(canvasId, savedDataURL = null) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
-            
-            // CẬP NHẬT: Tăng độ đậm (4) và đổi sang màu xanh đậm (#1f3a93 - Deep Indigo/Blue)
-            const SIGNATURE_COLOR = '#1f3a93'; 
-            const SIGNATURE_LINE_WIDTH = 2;    
+            const SIGNATURE_COLOR = '#1e3a8a';
+            const SIGNATURE_LINE_WIDTH = 2;
 
             const redraw = (dataURL) => {
                 const ctx = canvas.getContext('2d');
-                // Tối ưu hóa độ phân giải cho chữ ký sắc nét hơn
                 canvas.width = canvas.clientWidth * 2;
-                canvas.height = canvas.clientHeight * 2; 
-                ctx.scale(2, 2); 
-                
-                // Cập nhật độ đậm và màu sắc
-                ctx.lineWidth = SIGNATURE_LINE_WIDTH; 
+                canvas.height = canvas.clientHeight * 2;
+                ctx.scale(2, 2);
+                ctx.lineWidth = SIGNATURE_LINE_WIDTH;
                 ctx.lineCap = 'round';
                 ctx.strokeStyle = SIGNATURE_COLOR;
-
-                if (dataURL && dataURL !== canvas.toDataURL()) { // Kiểm tra dataURL khác canvas trắng mặc định
+                if (dataURL) {
                     const img = new Image();
-                    img.onload = function() {
-                        ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight); 
-                    };
+                    img.onload = function () { ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight); };
                     img.src = dataURL;
                 }
-            }
-
+            };
             redraw(savedDataURL);
 
             const ctx = canvas.getContext('2d');
-            
-            // Cập nhật lại context settings cho việc vẽ mới
-            ctx.lineWidth = SIGNATURE_LINE_WIDTH; 
+            ctx.lineWidth = SIGNATURE_LINE_WIDTH;
             ctx.lineCap = 'round';
             ctx.strokeStyle = SIGNATURE_COLOR;
 
             function getCoords(e) {
                 const rect = canvas.getBoundingClientRect();
                 let clientX, clientY;
-
-                if (e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-
-                // CẬP NHẬT: Ngăn trình duyệt cuộn/zoom khi chạm vào canvas
-                e.preventDefault(); 
-
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
+                if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                else { clientX = e.clientX; clientY = e.clientY; }
+                e.preventDefault();
+                return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
             const startDrawing = (e) => {
                 isDrawing = true;
-                canvas.classList.remove('input-error'); // Xóa trạng thái lỗi khi bắt đầu ký
+                canvas.classList.remove('input-error');
                 const { x, y } = getCoords(e);
-                ctx.beginPath();
-                ctx.moveTo(x, y);
+                ctx.beginPath(); ctx.moveTo(x, y);
             };
-
             const draw = (e) => {
                 if (!isDrawing) return;
                 const { x, y } = getCoords(e);
-                ctx.lineTo(x, y);
-                ctx.stroke();
+                ctx.lineTo(x, y); ctx.stroke();
             };
+            const stopDrawing = () => { if (isDrawing) { isDrawing = false; ctx.closePath(); startSaveTimer(); } };
 
-            const stopDrawing = () => {
-                if(isDrawing) {
-                    isDrawing = false;
-                    ctx.closePath();
-                    startSaveTimer(); 
-                }
-            };
-
-            // Mouse events
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing); 
-
-            // Touch events (ĐÃ BỎ e.preventDefault() ở đây vì đã chuyển vào getCoords() để tránh chặn các sự kiện touch khác)
+            canvas.addEventListener('mouseout', stopDrawing);
             canvas.addEventListener('touchstart', startDrawing, { passive: false });
             canvas.addEventListener('touchmove', draw, { passive: false });
             canvas.addEventListener('touchend', stopDrawing);
@@ -1165,17 +980,17 @@
             const canvas = document.getElementById(canvasId);
             if (canvas) {
                 const ctx = canvas.getContext('2d');
-                // Xóa canvas với độ phân giải cao
-                ctx.clearRect(0, 0, canvas.width, canvas.height); 
-                // Cần gọi startSaveTimer để lưu canvas trống
-                startSaveTimer(); 
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                startSaveTimer();
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState(); 
-        });
-
+        // ============ KHỞI TẠO ============
+        function init() {
+            bindDimensionListeners();
+            loadState();
+        }
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
