@@ -10,7 +10,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Biên Bản Khảo Sát Giếng Thang</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ================================================================
+           LỚP UTILITY THUẦN CSS — thay thế Tailwind CDN.
+           Lý do: Tailwind CDN yêu cầu mạng để tải; PWA khảo sát giếng thang
+           cần chạy được cả khi không có mạng ngoài công trường (hố PIT, tầng
+           hầm...). Toàn bộ class dưới đây tái tạo đúng hành vi Tailwind đã
+           dùng trong file, không đổi bất kỳ class nào trong HTML/JS.
+           ================================================================ */
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-grow { flex-grow: 1; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .text-center { text-align: center; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .break-words { overflow-wrap: break-word; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .top-1\/2 { top: 50%; }
+        .top-3 { top: 12px; }
+        .right-1 { right: 4px; }
+        .right-3 { right: 12px; }
+        .transform { transform: translateZ(0); }
+        .-translate-y-1\/2 { transform: translateY(-50%); }
+        .pointer-events-none { pointer-events: none; }
+        .cursor-pointer { cursor: pointer; }
+        .opacity-0 { opacity: 0; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .w-4 { width: 1rem; } .h-4 { height: 1rem; }
+        .w-5 { width: 1.25rem; } .h-5 { height: 1.25rem; }
+        .h-40 { height: 10rem; }
+        .min-w-0 { min-width: 0; }
+        .min-h-\[28px\] { min-height: 28px; }
+        .min-w-\[110px\] { min-width: 110px; }
+        .w-1\/2 { width: 50%; } .w-1\/3 { width: 33.3333%; } .w-1\/12 { width: 8.3333%; }
+        .w-\[20\%\] { width: 20%; } .w-\[22\%\] { width: 22%; } .w-\[24\%\] { width: 24%; }
+        .w-\[28\%\] { width: 28%; } .w-\[40\%\] { width: 40%; } .w-\[6\%\] { width: 6%; }
+        .mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; }
+        .mb-4 { margin-bottom: 16px; } .mb-5 { margin-bottom: 20px; } .mb-7 { margin-bottom: 28px; }
+        .mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-6 { margin-top: 24px; }
+        .ml-1 { margin-left: 4px; }
+        .p-0 { padding: 0; } .p-1 { padding: 4px; } .p-2 { padding: 8px; } .p-4 { padding: 16px; }
+        .pb-1 { padding-bottom: 4px; } .pb-2 { padding-bottom: 8px; } .pb-4 { padding-bottom: 16px; }
+        .pt-2 { padding-top: 8px; } .pt-3 { padding-top: 12px; }
+        .pl-3 { padding-left: 12px; }
+        .px-1 { padding-left: 4px; padding-right: 4px; }
+        .px-2 { padding-left: 8px; padding-right: 8px; }
+        .px-3 { padding-left: 12px; padding-right: 12px; }
+        .py-1\.5 { padding-top: 6px; padding-bottom: 6px; }
+        .\!p-1 { padding: 4px !important; }
+        .\!p-2 { padding: 8px !important; }
+        .gap-2 { gap: 8px; }
+        .gap-y-2 { row-gap: 8px; }
+        .border { border: 1px solid #e5e7eb; }
+        .border-b { border-bottom: 1px solid #e5e7eb; }
+        .border-t { border-top: 1px solid #e5e7eb; }
+        .border-l-4 { border-left: 4px solid; }
+        .border-r-2 { border-right: 2px solid; }
+        .border-dashed { border-style: dashed; }
+        .border-gray-400 { border-color: #9ca3af; }
+        .rounded-md { border-radius: 8px; }
+        .rounded-lg { border-radius: 12px; }
+        .bg-white { background-color: #fff; }
+        .bg-transparent { background-color: transparent; }
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .hover\:bg-gray-200:hover { background-color: #e5e7eb; }
+        .text-xs { font-size: 0.75rem; line-height: 1.2; }
+        .text-sm { font-size: 0.875rem; line-height: 1.4; }
+        .text-base { font-size: 1rem; line-height: 1.5; }
+        .text-lg { font-size: 1.125rem; line-height: 1.5; }
+        .text-xl { font-size: 1.25rem; line-height: 1.5; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-extrabold { font-weight: 800; }
+        .font-normal { font-weight: 400; }
+        .italic { font-style: italic; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-500 { color: #6b7280; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-800 { color: #1f2937; }
+        .leading-snug { line-height: 1.375; }
+        .resize-none { resize: none; }
+        .transition { transition: all .15s ease; }
+        @media (min-width: 640px) {
+            .sm\:flex-row { flex-direction: row; }
+            .sm\:p-4 { padding: 16px; }
+            .sm\:space-x-3 > * + * { margin-left: 12px; }
+            .sm\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+            .sm\:w-1\/4 { width: 25%; }
+        }
+    </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
@@ -41,6 +140,7 @@
             max-width: 800px;
             margin: 10px auto;
             padding: 16px;
+            padding-top: 60px;
             background-color: #ffffff;
             box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
             border-radius: 14px;
@@ -53,6 +153,13 @@
 
         /* ============ Nút trạng thái - dạng segmented, ngang, thân thiện chạm ============ */
         .status-btn-group { display: flex; gap: 6px; width: 100%; }
+        .print-status-text {
+            display: none; /* chỉ hiện khi in — xem @media print bên dưới */
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            text-align: center;
+        }
         .status-btn {
             flex: 1;
             min-height: 40px;
@@ -133,6 +240,27 @@
             opacity: 0; pointer-events: none; transition: opacity .15s ease;
         }
         .print-fab:hover::after, .print-fab:focus-visible::after { opacity: 1; }
+
+        /* ============ Nút chuyển ngôn ngữ (cờ VN / EN) ============ */
+        .lang-switch {
+            position: fixed;
+            top: calc(14px + env(safe-area-inset-top));
+            left: calc(14px + env(safe-area-inset-left));
+            display: flex; gap: 3px;
+            background: #fff;
+            border: 1px solid var(--c-line);
+            border-radius: 999px;
+            padding: 4px;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.12);
+            z-index: 900;
+        }
+        .lang-btn {
+            width: 34px; height: 34px; border-radius: 999px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; line-height: 1; border: none; background: transparent;
+            cursor: pointer; opacity: .4; transition: all .15s ease; padding: 0;
+        }
+        .lang-btn.active { opacity: 1; box-shadow: inset 0 0 0 1.5px var(--c-primary); background: rgba(29,78,216,0.06); }
 
         /* ============ Bảng dữ liệu ============ */
         table.data-table {
@@ -257,238 +385,245 @@
             .deviation-output { padding: 2px 6px !important; }
             canvas { border: 0.5px solid #000 !important; }
             .print-fab { display: none !important; }
+            .lang-switch { display: none !important; }
             .sub-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+            .print-status-text { display: block !important; }
         }
     </style>
 </head>
 <body class="p-0 sm:p-4">
 
     <div class="report-container">
-        <button onclick="handlePrintClick()" class="no-print print-fab" title="Xuất Biên Bản ra PDF" aria-label="Xuất Biên Bản ra PDF">
+        <div class="lang-switch no-print" role="group" aria-label="Ngôn ngữ / Language">
+            <button type="button" class="lang-btn active" data-lang="vi" onclick="setLanguage('vi')" title="Tiếng Việt">🇻🇳</button>
+            <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')" title="English">🇺🇸</button>
+        </div>
+        <button onclick="handlePrintClick()" class="no-print print-fab" data-i18n-title="printTitle" title="Xuất Biên Bản ra PDF" aria-label="Xuất Biên Bản ra PDF">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm2 5a1 1 0 00-1 1v1h10v-1a1 1 0 00-1-1H7zm1-5h4v3H8V4z" clip-rule="evenodd" />
             </svg>
         </button>
 
         <header class="text-center mb-7 pb-4 page-break-avoid-section" style="border-bottom: 2px solid var(--c-primary);">
-            <h1 class="text-xl sm:text-2xl font-extrabold" style="color: var(--c-primary-dark);">BIÊN BẢN KHẢO SÁT &amp; KIỂM TRA HIỆN TRẠNG GIẾNG THANG</h1>
+            <h1 class="text-xl sm:text-2xl font-extrabold" style="color: var(--c-primary-dark);" data-i18n="mainTitle">BIÊN BẢN KHẢO SÁT &amp; KIỂM TRA HIỆN TRẠNG GIẾNG THANG</h1>
             <div class="flex flex-wrap items-center justify-center gap-2 mt-3 no-print">
                 <span class="header-pill" id="header-pill-code">Mã BB: —</span>
                 <span class="header-pill" id="header-pill-date">Ngày: —</span>
             </div>
         </header>
 
+
         <div class="sub-card mb-7 border-l-4 page-break-avoid-section" style="border-left-color: var(--c-primary);">
-            <h3 class="text-lg font-bold mb-2" style="color: var(--c-primary-dark);">Thông Tin Chung</h3>
+            <h3 class="text-lg font-bold mb-2" style="color: var(--c-primary-dark);" data-i18n="generalInfo">Thông Tin Chung</h3>
             <div class="grid grid-cols-1 gap-y-2 text-sm">
                 <p class="flex items-start">
-                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Tên Công trình:</span>
-                    <textarea id="info-project-name" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[Nhà ở Tư nhân]"></textarea>
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label" data-i18n="projectName">Tên Công trình:</span>
+                    <textarea id="info-project-name" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="projectNamePh" placeholder="[Nhà ở Tư nhân]"></textarea>
                 </p>
                 <p class="flex items-start">
-                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Địa chỉ:</span>
-                    <textarea id="info-address" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="[CLxx-yy KĐT Him Lam...]"></textarea>
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label" data-i18n="address">Địa chỉ:</span>
+                    <textarea id="info-address" rows="1" class="flex-grow w-full resize-none !p-1" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="addressPh" placeholder="[CLxx-yy KĐT Him Lam...]"></textarea>
                 </p>
                 <p class="flex items-start mt-2">
-                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] whitespace-nowrap flex-shrink-0">Hạng mục:</span>
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] whitespace-nowrap flex-shrink-0" data-i18n="category">Hạng mục:</span>
                     <div class="relative flex-grow w-full min-w-0">
                         <select id="info-category" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-20" onchange="updateCategoryDisplay(this.value); startSaveTimer()">
-                            <option value="Khảo sát giếng thang trước khi ký Hợp đồng">Khảo sát giếng thang trước khi ký Hợp đồng</option>
-                            <option value="Khảo sát giếng thang sau khi ký Hợp đồng">Khảo sát giếng thang sau khi ký Hợp đồng</option>
-                            <option value="Khảo sát điều kiện cho Hàng về Công trình">Khảo sát điều kiện cho Hàng về Công trình</option>
-                            <option value="Khảo sát cải tạo, thay thế thang máy">Khảo sát cải tạo, thay thế thang máy</option>
-                            <option value="Khác">Khác</option>
+                            <option value="before_contract" data-i18n="cat_before_contract">Khảo sát giếng thang trước khi ký Hợp đồng</option>
+                            <option value="after_contract" data-i18n="cat_after_contract">Khảo sát giếng thang sau khi ký Hợp đồng</option>
+                            <option value="goods_arrival" data-i18n="cat_goods_arrival">Khảo sát điều kiện cho Hàng về Công trình</option>
+                            <option value="renovation" data-i18n="cat_renovation">Khảo sát cải tạo, thay thế thang máy</option>
+                            <option value="other" data-i18n="cat_other">Khác</option>
                         </select>
                         <div id="info-category-display" class="p-1 border-b border-gray-400 text-sm text-gray-700 cursor-pointer min-h-[28px] leading-snug break-words" onclick="document.getElementById('info-category').focus();"></div>
-                        <div class="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none z-10">
+                        <div class="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none z-10 no-print">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
                 </p>
                 <p class="flex items-center mt-2">
-                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label">Ngày khảo sát:</span>
+                    <span class="font-semibold text-gray-700 w-1/3 sm:w-1/4 min-w-[110px] flex-shrink-0 required-label" data-i18n="surveyDate">Ngày khảo sát:</span>
                     <input type="date" id="info-date" class="flex-grow w-full p-1 border-b border-gray-400 bg-transparent" onchange="updateHeaderPills(); startSaveTimer()">
                 </p>
             </div>
         </div>
 
         <section class="mb-7 page-break-avoid-section">
-            <h3 class="text-xl font-bold mb-3 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);">I. THÀNH PHẦN THAM DỰ</h3>
+            <h3 class="text-xl font-bold mb-3 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);" data-i18n="section1Title">I. THÀNH PHẦN THAM DỰ</h3>
             <div class="sub-card">
             <table class="data-table responsive-table">
-                <thead><tr><th class="w-1/2">HỌ VÀ TÊN</th><th class="w-1/3">CHỨC VỤ</th><th class="w-1/12 text-center no-print">Xóa</th></tr></thead>
+                <thead><tr><th class="w-1/2" data-i18n="thName">HỌ VÀ TÊN</th><th class="w-1/3" data-i18n="thRole">CHỨC VỤ</th><th class="w-1/12 text-center no-print" data-i18n="thDelete">Xóa</th></tr></thead>
                 <tbody id="participants-body"></tbody>
             </table>
             <div class="flex flex-col sm:flex-row gap-2 sm:space-x-3 mt-3 no-print">
-                <button onclick="addParticipant('A')" class="action-btn btn-outline">+ Thêm Chủ đầu tư (A)</button>
-                <button onclick="addParticipant('B')" class="action-btn btn-ink">+ Thêm Nhà thầu TM (B)</button>
+                <button onclick="addParticipant('A')" class="action-btn btn-outline" data-i18n="addPartyA">+ Thêm Chủ đầu tư (A)</button>
+                <button onclick="addParticipant('B')" class="action-btn btn-ink" data-i18n="addPartyB">+ Thêm Nhà thầu TM (B)</button>
             </div>
             </div>
         </section>
 
         <section class="mb-7">
-            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3 page-break-avoid-section" style="color: var(--c-ink); border-color: var(--c-primary);">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
+            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3 page-break-avoid-section" style="color: var(--c-ink); border-color: var(--c-primary);" data-i18n="section2Title">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
 
             <div class="page-break-after-subsection mb-5 sub-card">
-                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">1. Kích thước Giếng Thang (mm)</h4>
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1" data-i18n="dimTitle">1. Kích thước Giếng Thang (mm)</h4>
                 <table class="data-table responsive-table grid-2col-table mb-4">
-                    <thead><tr><th class="w-[28%]">Hạng mục</th><th class="w-[24%]">Hợp đồng</th><th class="w-[24%]">Thực tế</th><th class="w-[24%]">Độ lệch</th></tr></thead>
+                    <thead><tr><th class="w-[28%]" data-i18n="thItem">Hạng mục</th><th class="w-[24%]" data-i18n="thContract">Hợp đồng</th><th class="w-[24%]" data-i18n="thActual">Thực tế</th><th class="w-[24%]" data-i18n="thDeviation">Độ lệch</th></tr></thead>
                     <tbody>
                         <tr>
-                            <td class="no-mobile-label" data-label="Hạng mục">Chiều rộng giếng (W)</td>
-                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-W-hd" placeholder="VD: 1500"></td>
-                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-W-tt" placeholder="VD: 1495"></td>
-                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-W-dev">—</span></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="dimW">Chiều rộng giếng (W)</td>
+                            <td data-label="Hợp đồng (mm)" data-i18n-label="thContract"><input type="number" inputmode="decimal" id="dim-W-hd" placeholder="VD: 1500"></td>
+                            <td data-label="Thực tế (mm)" data-i18n-label="thActual"><input type="number" inputmode="decimal" id="dim-W-tt" placeholder="VD: 1495"></td>
+                            <td data-label="Độ lệch (mm)" data-i18n-label="thDeviation"><span class="deviation-output dev-empty" id="dim-W-dev">—</span></td>
                         </tr>
                         <tr>
-                            <td class="no-mobile-label" data-label="Hạng mục">Chiều sâu giếng (D)</td>
-                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-D-hd" placeholder="VD: 1800"></td>
-                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-D-tt" placeholder="VD: 1805"></td>
-                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-D-dev">—</span></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="dimD">Chiều sâu giếng (D)</td>
+                            <td data-label="Hợp đồng (mm)" data-i18n-label="thContract"><input type="number" inputmode="decimal" id="dim-D-hd" placeholder="VD: 1800"></td>
+                            <td data-label="Thực tế (mm)" data-i18n-label="thActual"><input type="number" inputmode="decimal" id="dim-D-tt" placeholder="VD: 1805"></td>
+                            <td data-label="Độ lệch (mm)" data-i18n-label="thDeviation"><span class="deviation-output dev-empty" id="dim-D-dev">—</span></td>
                         </tr>
                         <tr>
-                            <td class="no-mobile-label" data-label="Hạng mục">Chiều sâu hố PIT</td>
-                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-PIT-hd" placeholder="VD: 1400"></td>
-                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-PIT-tt" placeholder="VD: 1350"></td>
-                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-PIT-dev">—</span></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="dimPIT">Chiều sâu hố PIT</td>
+                            <td data-label="Hợp đồng (mm)" data-i18n-label="thContract"><input type="number" inputmode="decimal" id="dim-PIT-hd" placeholder="VD: 1400"></td>
+                            <td data-label="Thực tế (mm)" data-i18n-label="thActual"><input type="number" inputmode="decimal" id="dim-PIT-tt" placeholder="VD: 1350"></td>
+                            <td data-label="Độ lệch (mm)" data-i18n-label="thDeviation"><span class="deviation-output dev-empty" id="dim-PIT-dev">—</span></td>
                         </tr>
                         <tr>
-                            <td class="no-mobile-label" data-label="Hạng mục">Khoảng đỉnh OH (Overhead)</td>
-                            <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" id="dim-OH-hd" placeholder="VD: 3900"></td>
-                            <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" id="dim-OH-tt" placeholder="VD: 3850"></td>
-                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="dim-OH-dev">—</span></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="dimOH">Khoảng đỉnh OH (Overhead)</td>
+                            <td data-label="Hợp đồng (mm)" data-i18n-label="thContract"><input type="number" inputmode="decimal" id="dim-OH-hd" placeholder="VD: 3900"></td>
+                            <td data-label="Thực tế (mm)" data-i18n-label="thActual"><input type="number" inputmode="decimal" id="dim-OH-tt" placeholder="VD: 3850"></td>
+                            <td data-label="Độ lệch (mm)" data-i18n-label="thDeviation"><span class="deviation-output dev-empty" id="dim-OH-dev">—</span></td>
                         </tr>
                     </tbody>
                 </table>
-                <p class="text-xs text-gray-400 mb-4 px-1">* Độ lệch = Thực tế − Hợp đồng. Màu đỏ: thiếu hụt so với hợp đồng (cần lưu ý an toàn hành trình/PIT/OH). Màu xanh dương: dư ra. Màu xanh lá: khớp tuyệt đối.</p>
+                <p class="text-xs text-gray-400 mb-4 px-1" data-i18n="dimNote">* Độ lệch = Thực tế − Hợp đồng. Màu đỏ: thiếu hụt so với hợp đồng (cần lưu ý an toàn hành trình/PIT/OH). Màu xanh dương: dư ra. Màu xanh lá: khớp tuyệt đối.</p>
 
-                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">Cao độ các Tầng (chiều cao tầng, mm)</h4>
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1" data-i18n="floorsTitle">Cao độ các Tầng (chiều cao tầng, mm)</h4>
                 <table class="data-table responsive-table grid-2col-table" id="floors-table">
-                    <thead><tr><th class="w-[28%]">Tầng</th><th class="w-[22%]">Hợp đồng</th><th class="w-[22%]">Thực tế</th><th class="w-[22%]">Độ lệch</th><th class="w-[6%] text-center no-print">Xóa</th></tr></thead>
+                    <thead><tr><th class="w-[28%]" data-i18n="thFloor">Tầng</th><th class="w-[22%]" data-i18n="thContract">Hợp đồng</th><th class="w-[22%]" data-i18n="thActual">Thực tế</th><th class="w-[22%]" data-i18n="thDeviation">Độ lệch</th><th class="w-[6%] text-center no-print" data-i18n="thDelete">Xóa</th></tr></thead>
                     <tbody id="floors-body"></tbody>
                     <tfoot>
                         <tr>
-                            <td class="no-mobile-label" data-label="Tổng">TỔNG HÀNH TRÌNH</td>
-                            <td data-label="Hợp đồng (mm)"><span id="floors-total-hd">—</span></td>
-                            <td data-label="Thực tế (mm)"><span id="floors-total-tt">—</span></td>
-                            <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="floors-total-dev">—</span></td>
+                            <td class="no-mobile-label" data-label="Tổng" data-i18n="floorsTotal">TỔNG HÀNH TRÌNH</td>
+                            <td data-label="Hợp đồng (mm)" data-i18n-label="thContract"><span id="floors-total-hd">—</span></td>
+                            <td data-label="Thực tế (mm)" data-i18n-label="thActual"><span id="floors-total-tt">—</span></td>
+                            <td data-label="Độ lệch (mm)" data-i18n-label="thDeviation"><span class="deviation-output dev-empty" id="floors-total-dev">—</span></td>
                             <td class="no-print"></td>
                         </tr>
                     </tfoot>
                 </table>
                 <div class="mt-2 no-print">
-                    <button onclick="addFloor()" class="action-btn btn-outline">+ Thêm Tầng</button>
+                    <button onclick="addFloor()" class="action-btn btn-outline" data-i18n="addFloor">+ Thêm Tầng</button>
                 </div>
             </div>
 
             <div class="page-break-after-subsection mb-5 sub-card">
-                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">2. Yêu cầu Xây dựng</h4>
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1" data-i18n="section2_2Title">2. Yêu cầu Xây dựng</h4>
                 <table class="data-table responsive-table">
-                    <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
+                    <thead><tr><th class="w-[40%]" data-i18n="thItem">Hạng mục</th><th class="w-[40%]" data-i18n="thStatusCond">Tình trạng / Thực tế</th><th class="w-[20%]" data-i18n="thStatus">ĐG</th></tr></thead>
                     <tbody id="fixed-survey-body">
                         <tr class="fixed-item-row" data-item="xd-damgiuatang">
-                            <td class="no-mobile-label" data-label="Hạng mục">1. Dầm giữa tầng</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Chưa có / Đã có đủ (150x250)"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item1">1. Dầm giữa tầng</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="item1Ph" placeholder="Chưa có / Đã có đủ (150x250)"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
+                                    <span class="status-btn na" onclick="handleSelection(this, 'na'); startSaveTimer()"><span data-i18n="statusNA">K.CÓ</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-damcua">
-                            <td class="no-mobile-label" data-label="Hạng mục">2. Dầm cửa tầng</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Kích thước đủ / Thiếu kích thước"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item2">2. Dầm cửa tầng</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="item2Ph" placeholder="Kích thước đủ / Thiếu kích thước"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
+                                    <span class="status-btn na" onclick="handleSelection(this, 'na'); startSaveTimer()"><span data-i18n="statusNA">K.CÓ</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-cuagiengthang">
-                            <td class="no-mobile-label" data-label="Hạng mục">3. Kích thước cửa tầng thang máy</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="W x H"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item3">3. Kích thước cửa tầng thang máy</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="item3Ph" placeholder="W x H"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-lochotang">
-                            <td class="no-mobile-label" data-label="Hạng mục">4. Lỗ chờ lắp hộp gọi tầng</td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item4">4. Lỗ chờ lắp hộp gọi tầng</td>
                             <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-damdatmay">
-                            <td class="no-mobile-label" data-label="Hạng mục">5. Dầm đặt máy (thang có phòng máy)</td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item5">5. Dầm đặt máy (thang có phòng máy)</td>
                             <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có / Chưa có"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
+                                    <span class="status-btn na" onclick="handleSelection(this, 'na'); startSaveTimer()"><span data-i18n="statusNA">K.CÓ</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-lochogamdatmay">
-                            <td class="no-mobile-label" data-label="Hạng mục">6. Lỗ chờ gác dầm đặt máy</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã đục / Đang bịt kín"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item6">6. Lỗ chờ gác dầm đặt máy</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="item6Ph" placeholder="Đã đục / Đang bịt kín"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                                    <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
+                                    <span class="status-btn na" onclick="handleSelection(this, 'na'); startSaveTimer()"><span data-i18n="statusNA">K.CÓ</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                         <tr class="fixed-item-row" data-item="xd-pitchongtham">
-                            <td class="no-mobile-label" data-label="Hạng mục">7. Hố PIT thang máy (chống thấm)</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã chống thấm / Đang thấm nước"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="item7">7. Hố PIT thang máy (chống thấm)</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="item7Ph" placeholder="Đã chống thấm / Đang thấm nước"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                     </tbody>
                     <tbody id="custom-survey-body"></tbody>
                 </table>
                 <div class="mt-2 no-print">
-                    <button onclick="addCustomSurveyItem()" class="action-btn" style="background: var(--c-bg-soft); color: var(--c-ink); border: 1.5px solid var(--c-line);">+ Thêm Hạng Mục Khác</button>
+                    <button onclick="addCustomSurveyItem()" class="action-btn" style="background: var(--c-bg-soft); color: var(--c-ink); border: 1.5px solid var(--c-line);" data-i18n="addCustomItem">+ Thêm Hạng Mục Khác</button>
                 </div>
             </div>
 
             <div class="page-break-after-subsection sub-card">
-                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1">3. Nguồn điện</h4>
+                <h4 class="text-base font-bold text-gray-700 mb-2 ml-1" data-i18n="section2_3Title">3. Nguồn điện</h4>
                 <table class="data-table responsive-table">
-                    <thead><tr><th class="w-[40%]">Hạng mục</th><th class="w-[40%]">Tình trạng / Thực tế</th><th class="w-[20%]">ĐG</th></tr></thead>
+                    <thead><tr><th class="w-[40%]" data-i18n="thItem">Hạng mục</th><th class="w-[40%]" data-i18n="thStatusCond">Tình trạng / Thực tế</th><th class="w-[20%]" data-i18n="thStatus">ĐG</th></tr></thead>
                     <tbody>
                         <tr class="fixed-item-row" data-item="nd-dien3pha">
-                            <td class="no-mobile-label" data-label="Hạng mục">1. Nguồn điện 3 Pha (380V)</td>
-                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Đã có tại phòng máy / Chưa có"></textarea></td>
+                            <td class="no-mobile-label" data-label="Hạng mục" data-i18n="powerItem">1. Nguồn điện 3 Pha (380V)</td>
+                            <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="powerItemPh" placeholder="Đã có tại phòng máy / Chưa có"></textarea></td>
                             <td data-label="Đánh giá">
                                 <div class="status-btn-group no-print">
-                                    <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                                    <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
+                                    <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">Đạt</span></span>
+                                    <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">K.Đạt</span></span>
                                 </div>
-                                <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
+                                <div class="print-status-text"></div>
                             </td>
                         </tr>
                     </tbody>
@@ -497,13 +632,13 @@
         </section>
 
         <section class="mb-7 p-4 rounded-md page-break-avoid-section" style="background: var(--c-ink); color: #fff;">
-            <h3 class="text-xl font-bold mb-3 required-label">III. KẾT LUẬN &amp; ĐỀ NGHỊ THỰC HIỆN</h3>
+            <h3 class="text-xl font-bold mb-3 required-label" data-i18n="section3Title">III. KẾT LUẬN &amp; ĐỀ NGHỊ THỰC HIỆN</h3>
             <div class="mb-5">
-                <h4 class="text-base font-semibold mb-1">1. Tình trạng Tổng thể:</h4>
-                <textarea rows="3" id="conclusion-summary" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt."></textarea>
+                <h4 class="text-base font-semibold mb-1" data-i18n="summaryLabel">1. Tình trạng Tổng thể:</h4>
+                <textarea rows="3" id="conclusion-summary" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" data-i18n-placeholder="summaryPh" placeholder="Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt."></textarea>
             </div>
             <div>
-                <h4 class="text-base font-semibold mb-1">2. Hạng mục Bắt buộc hoàn thiện:</h4>
+                <h4 class="text-base font-semibold mb-1" data-i18n="actionsLabel">2. Hạng mục Bắt buộc hoàn thiện:</h4>
                 <textarea rows="5" id="conclusion-actions" class="w-full p-2 rounded-lg text-sm text-gray-800 bg-white" oninput="adjustTextareaHeight(this); startSaveTimer()" placeholder="1. Chủ đầu tư cần đục/bổ sung toàn bộ Dầm giữa tầng và Dầm cửa tầng theo kích thước chuẩn 150x250mm.
 2. Tiến hành chống thấm Hố PIT triệt để, bàn giao hiện trạng khô ráo.
 3. Cung cấp Nguồn điện 3 Pha (380V) tại Phòng máy trước ngày [Ngày tháng]."></textarea>
@@ -511,32 +646,32 @@
         </section>
 
         <section class="page-break-avoid-section">
-            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);">IV. XÁC NHẬN CỦA CÁC BÊN</h3>
+            <h3 class="text-xl font-bold mb-4 border-l-4 pl-3" style="color: var(--c-ink); border-color: var(--c-primary);" data-i18n="section4Title">IV. XÁC NHẬN CỦA CÁC BÊN</h3>
             <table class="signature-table w-full" style="border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th class="w-1/2 text-center text-sm font-bold p-2 border-r-2 border-dashed" style="color: var(--c-primary-dark); background: rgba(29,78,216,0.08); border-color: var(--c-line);">ĐẠI DIỆN CHỦ ĐẦU TƯ (BÊN A)</th>
-                        <th class="w-1/2 text-center text-sm font-bold p-2" style="color: var(--c-ink); background: var(--c-bg-soft);">ĐẠI DIỆN NHÀ THẦU TM (BÊN B)</th>
+                        <th class="w-1/2 text-center text-sm font-bold p-2 border-r-2 border-dashed" style="color: var(--c-primary-dark); background: rgba(29,78,216,0.08); border-color: var(--c-line);" data-i18n="sigHeaderA">ĐẠI DIỆN CHỦ ĐẦU TƯ (BÊN A)</th>
+                        <th class="w-1/2 text-center text-sm font-bold p-2" style="color: var(--c-ink); background: var(--c-bg-soft);" data-i18n="sigHeaderB">ĐẠI DIỆN NHÀ THẦU TM (BÊN B)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td class="font-normal text-xs italic text-center p-2 no-print" colspan="2">(Dùng chuột, bút cảm ứng hoặc ngón tay để ký. Không bắt buộc ký cả hai bên để in)</td></tr>
+                    <tr><td class="font-normal text-xs italic text-center p-2 no-print" colspan="2" data-i18n="sigInstruction">(Dùng chuột, bút cảm ứng hoặc ngón tay để ký. Không bắt buộc ký cả hai bên để in)</td></tr>
                     <tr>
                         <td class="pt-2 pb-2 border-r-2 border-dashed relative h-40" style="border-color: var(--c-line);">
                             <canvas id="signatureA" class="w-full h-full border rounded-md" style="border-color: var(--c-line);"></canvas>
-                            <button onclick="clearCanvas('signatureA'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition">Xóa Ký</button>
+                            <button onclick="clearCanvas('signatureA'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition" data-i18n="clearSig">Xóa Ký</button>
                         </td>
                         <td class="pt-2 pb-2 relative h-40">
                             <canvas id="signatureB" class="w-full h-full border rounded-md" style="border-color: var(--c-line);"></canvas>
-                            <button onclick="clearCanvas('signatureB'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition">Xóa Ký</button>
+                            <button onclick="clearCanvas('signatureB'); startSaveTimer()" class="no-print absolute top-3 right-3 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 py-1.5 px-3 rounded-md transition" data-i18n="clearSig">Xóa Ký</button>
                         </td>
                     </tr>
                     <tr>
                         <td class="pt-2 pb-1 border-r-2 border-dashed text-center text-sm font-semibold" style="border-color: var(--c-line);">
-                            <input type="text" id="signature-name-A" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" placeholder="[Họ và Tên Bên A]">
+                            <input type="text" id="signature-name-A" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" data-i18n-placeholder="sigNamePhA" placeholder="[Họ và Tên Bên A]">
                         </td>
                         <td class="pt-2 pb-1 text-center text-sm font-semibold">
-                            <input type="text" id="signature-name-B" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" placeholder="[Họ và Tên Bên B]">
+                            <input type="text" id="signature-name-B" class="w-full text-center font-bold px-2 data-input" oninput="startSaveTimer()" data-i18n-placeholder="sigNamePhB" placeholder="[Họ và Tên Bên B]">
                         </td>
                     </tr>
                 </tbody>
@@ -544,7 +679,7 @@
         </section>
 
         <footer class="text-center mt-6 pt-3 border-t text-xs" style="color: var(--c-muted); border-color: var(--c-line);">
-            *Lưu ý: Biên bản này là căn cứ để theo dõi tiến độ hoàn thiện công trình xây dựng giếng thang máy.
+            <span data-i18n="footerNote">*Lưu ý: Biên bản này là căn cứ để theo dõi tiến độ hoàn thiện công trình xây dựng giếng thang máy.</span>
         </footer>
     </div>
 
@@ -552,10 +687,12 @@
 
     <script>
         const STORAGE_KEY = 'elevator_survey_report_state_v2';
+        const LANG_KEY = 'edas_survey_lang_pref';
         let saveTimer;
         let participantIdCounter = 0;
         let customSurveyIdCounter = 0;
         let floorIdCounter = 0;
+        let currentLang = localStorage.getItem(LANG_KEY) || 'vi';
 
         let participants = [
             { id: participantIdCounter++, type: 'A', name: '', role: '' },
@@ -565,6 +702,189 @@
         let floors = [ { id: floorIdCounter++, label: 'Tầng 1', hd: '', tt: '' } ];
         let reportCode = '';
 
+        // ============ NGÔN NGỮ (VI / EN) ============
+        const translations = {
+            vi: {
+                docTitle: 'Biên Bản Khảo Sát Giếng Thang',
+                mainTitle: 'BIÊN BẢN KHẢO SÁT &amp; KIỂM TRA HIỆN TRẠNG GIẾNG THANG',
+                printTitle: 'Xuất Biên Bản ra PDF',
+                pillCode: 'Mã BB', pillDate: 'Ngày',
+                generalInfo: 'Thông Tin Chung',
+                projectName: 'Tên Công trình:', projectNamePh: '[Nhà ở Tư nhân]',
+                address: 'Địa chỉ:', addressPh: '[CLxx-yy KĐT Him Lam...]',
+                category: 'Hạng mục:', surveyDate: 'Ngày khảo sát:',
+                cat_before_contract: 'Khảo sát giếng thang trước khi ký Hợp đồng',
+                cat_after_contract: 'Khảo sát giếng thang sau khi ký Hợp đồng',
+                cat_goods_arrival: 'Khảo sát điều kiện cho Hàng về Công trình',
+                cat_renovation: 'Khảo sát cải tạo, thay thế thang máy',
+                cat_other: 'Khác',
+                categoryLabels: {}, // gán bên dưới
+                section1Title: 'I. THÀNH PHẦN THAM DỰ',
+                thName: 'HỌ VÀ TÊN', thRole: 'CHỨC VỤ', thDelete: 'Xóa',
+                addPartyA: '+ Thêm Chủ đầu tư (A)', addPartyB: '+ Thêm Nhà thầu TM (B)',
+                partyAHeader: 'Đại diện Chủ đầu tư (BÊN A)', partyBHeader: 'Đại diện Nhà thầu TM (BÊN B)',
+                namePhA: 'Ví dụ: Nguyễn Văn A', namePhB: 'Ví dụ: Trần Thị B',
+                rolePhA: 'Chủ Nhà/Đại diện CĐT', rolePhB: 'CBKT Thang máy',
+                deletePerson: 'Xóa người tham dự', deleteFloor: 'Xóa tầng',
+                section2Title: 'II. NỘI DUNG KHẢO SÁT GIẾNG THANG',
+                dimTitle: '1. Kích thước Giếng Thang (mm)',
+                thItem: 'Hạng mục', thContract: 'Hợp đồng', thActual: 'Thực tế', thDeviation: 'Độ lệch',
+                dimW: 'Chiều rộng giếng (W)', dimD: 'Chiều sâu giếng (D)',
+                dimPIT: 'Chiều sâu hố PIT', dimOH: 'Khoảng đỉnh OH (Overhead)',
+                dimNote: '* Độ lệch = Thực tế − Hợp đồng. Màu đỏ: thiếu hụt so với hợp đồng (cần lưu ý an toàn hành trình/PIT/OH). Màu xanh dương: dư ra. Màu xanh lá: khớp tuyệt đối.',
+                floorsTitle: 'Cao độ các Tầng (chiều cao tầng, mm)',
+                thFloor: 'Tầng', floorsTotal: 'TỔNG HÀNH TRÌNH', addFloor: '+ Thêm Tầng',
+                floorDefaultPrefix: 'Tầng',
+                section2_2Title: '2. Yêu cầu Xây dựng',
+                thStatusCond: 'Tình trạng / Thực tế', thStatus: 'ĐG',
+                item1: '1. Dầm giữa tầng', item1Ph: 'Chưa có / Đã có đủ (150x250)',
+                item2: '2. Dầm cửa tầng', item2Ph: 'Kích thước đủ / Thiếu kích thước',
+                item3: '3. Kích thước cửa tầng thang máy', item3Ph: 'W x H',
+                item4: '4. Lỗ chờ lắp hộp gọi tầng',
+                item5: '5. Dầm đặt máy (thang có phòng máy)',
+                item6: '6. Lỗ chờ gác dầm đặt máy', item6Ph: 'Đã đục / Đang bịt kín',
+                item7: '7. Hố PIT thang máy (chống thấm)', item7Ph: 'Đã chống thấm / Đang thấm nước',
+                addCustomItem: '+ Thêm Hạng Mục Khác',
+                customItemPh: '[Tên hạng mục tùy chỉnh]', customDescPh: '[Mô tả tình trạng thực tế]',
+                deleteRow: 'Xóa hàng',
+                section2_3Title: '3. Nguồn điện',
+                powerItem: '1. Nguồn điện 3 Pha (380V)', powerItemPh: 'Đã có tại phòng máy / Chưa có',
+                statusPass: 'Đạt', statusFail: 'K.Đạt', statusNA: 'K.CÓ',
+                section3Title: 'III. KẾT LUẬN &amp; ĐỀ NGHỊ THỰC HIỆN',
+                summaryLabel: '1. Tình trạng Tổng thể:',
+                summaryPh: 'Tóm tắt: Giếng thang cơ bản đạt yêu cầu về vị trí, nhưng cần khắc phục các lỗi về kích thước dầm và cung cấp điện để đảm bảo an toàn và tiến độ lắp đặt.',
+                actionsLabel: '2. Hạng mục Bắt buộc hoàn thiện:',
+                section4Title: 'IV. XÁC NHẬN CỦA CÁC BÊN',
+                sigHeaderA: 'ĐẠI DIỆN CHỦ ĐẦU TƯ (BÊN A)', sigHeaderB: 'ĐẠI DIỆN NHÀ THẦU TM (BÊN B)',
+                sigInstruction: '(Dùng chuột, bút cảm ứng hoặc ngón tay để ký. Không bắt buộc ký cả hai bên để in)',
+                clearSig: 'Xóa Ký', sigNamePhA: '[Họ và Tên Bên A]', sigNamePhB: '[Họ và Tên Bên B]',
+                footerNote: '*Lưu ý: Biên bản này là căn cứ để theo dõi tiến độ hoàn thiện công trình xây dựng giếng thang máy.',
+                savedMsg: 'Đã lưu tự động!', restoredMsg: 'Đã khôi phục dữ liệu!',
+                saveErrMsg: 'Lỗi khi lưu dữ liệu!', loadErrMsg: 'Lỗi tải dữ liệu. Bắt đầu phiên mới.',
+                keepOneFloor: 'Phải giữ lại ít nhất một tầng.',
+                keepOneParty: 'Phải giữ lại ít nhất một đại diện cho mỗi bên.',
+                validatePrefix: 'Vui lòng điền đầy đủ:',
+                fieldProjectName: 'Tên Công trình', fieldAddress: 'Địa chỉ',
+                fieldDate: 'Ngày khảo sát', fieldSummary: 'Kết luận Tổng thể (III.1)',
+                iosPrintMsg: 'Trên iOS: chọn "Lưu vào Tệp" (Save to Files) để tạo PDF.',
+            },
+            en: {
+                docTitle: 'Elevator Shaft Survey Report',
+                mainTitle: 'ELEVATOR SHAFT SITE SURVEY &amp; INSPECTION REPORT',
+                printTitle: 'Export Report to PDF',
+                pillCode: 'Report No.', pillDate: 'Date',
+                generalInfo: 'General Information',
+                projectName: 'Project Name:', projectNamePh: '[Private Residence]',
+                address: 'Address:', addressPh: '[Site address...]',
+                category: 'Category:', surveyDate: 'Survey Date:',
+                cat_before_contract: 'Shaft survey before contract signing',
+                cat_after_contract: 'Shaft survey after contract signing',
+                cat_goods_arrival: 'Site readiness survey for equipment delivery',
+                cat_renovation: 'Renovation / modernization survey',
+                cat_other: 'Other',
+                categoryLabels: {},
+                section1Title: 'I. ATTENDEES',
+                thName: 'FULL NAME', thRole: 'ROLE', thDelete: 'Delete',
+                addPartyA: '+ Add Owner (A)', addPartyB: '+ Add Elevator Contractor (B)',
+                partyAHeader: 'Owner Representative (PARTY A)', partyBHeader: 'Elevator Contractor Representative (PARTY B)',
+                namePhA: 'e.g., John Smith', namePhB: 'e.g., Jane Doe',
+                rolePhA: 'Owner / Site Representative', rolePhB: 'Elevator Technician',
+                deletePerson: 'Remove attendee', deleteFloor: 'Delete floor',
+                section2Title: 'II. SHAFT SURVEY CONTENT',
+                dimTitle: '1. Shaft Dimensions (mm)',
+                thItem: 'Item', thContract: 'Contract', thActual: 'Actual', thDeviation: 'Deviation',
+                dimW: 'Shaft Width (W)', dimD: 'Shaft Depth (D)',
+                dimPIT: 'Pit Depth', dimOH: 'Overhead (OH)',
+                dimNote: '* Deviation = Actual − Contract. Red: shortfall vs. contract (check travel/PIT/OH safety). Blue: surplus. Green: exact match.',
+                floorsTitle: 'Floor Heights (mm)',
+                thFloor: 'Floor', floorsTotal: 'TOTAL TRAVEL', addFloor: '+ Add Floor',
+                floorDefaultPrefix: 'Floor',
+                section2_2Title: '2. Construction Requirements',
+                thStatusCond: 'Condition / Actual', thStatus: 'Result',
+                item1: '1. Inter-floor beam', item1Ph: 'Missing / Provided (150x250)',
+                item2: '2. Door lintel beam', item2Ph: 'Sufficient size / Undersized',
+                item3: '3. Landing door opening size', item3Ph: 'W x H',
+                item4: '4. Call box conduit / opening',
+                item5: '5. Machine beam (machine room type)',
+                item6: '6. Machine beam support opening', item6Ph: 'Opened / Still sealed',
+                item7: '7. Pit (waterproofing)', item7Ph: 'Waterproofed / Water leakage',
+                addCustomItem: '+ Add Other Item',
+                customItemPh: '[Custom item name]', customDescPh: '[Describe actual condition]',
+                deleteRow: 'Delete row',
+                section2_3Title: '3. Power Supply',
+                powerItem: '1. 3-Phase Power (380V)', powerItemPh: 'Available at machine room / Not available',
+                statusPass: 'Pass', statusFail: 'Fail', statusNA: 'N/A',
+                section3Title: 'III. CONCLUSION &amp; ACTION ITEMS',
+                summaryLabel: '1. Overall Status:',
+                summaryPh: 'Summary: The shaft generally meets location requirements, but beam dimensions and power supply issues must be resolved to ensure safety and installation schedule.',
+                actionsLabel: '2. Mandatory Items to Complete:',
+                section4Title: 'IV. ACKNOWLEDGEMENT OF PARTIES',
+                sigHeaderA: 'OWNER REPRESENTATIVE (PARTY A)', sigHeaderB: 'ELEVATOR CONTRACTOR REPRESENTATIVE (PARTY B)',
+                sigInstruction: '(Sign using mouse, stylus, or finger. Both signatures are not required to print)',
+                clearSig: 'Clear Signature', sigNamePhA: '[Party A Full Name]', sigNamePhB: '[Party B Full Name]',
+                footerNote: '*Note: This report serves as a record for tracking the completion progress of the elevator shaft construction.',
+                savedMsg: 'Auto-saved!', restoredMsg: 'Data restored!',
+                saveErrMsg: 'Error saving data!', loadErrMsg: 'Error loading data. Starting a new session.',
+                keepOneFloor: 'At least one floor must remain.',
+                keepOneParty: 'At least one representative must remain for each party.',
+                validatePrefix: 'Please complete:',
+                fieldProjectName: 'Project Name', fieldAddress: 'Address',
+                fieldDate: 'Survey Date', fieldSummary: 'Overall Conclusion (III.1)',
+                iosPrintMsg: 'On iOS: choose "Save to Files" to create a PDF.',
+            },
+        };
+        // Gán map nhãn Hạng mục cho từng ngôn ngữ (dùng chung key code)
+        ['vi', 'en'].forEach(l => {
+            translations[l].categoryLabels = {
+                before_contract: translations[l].cat_before_contract,
+                after_contract: translations[l].cat_after_contract,
+                goods_arrival: translations[l].cat_goods_arrival,
+                renovation: translations[l].cat_renovation,
+                other: translations[l].cat_other,
+            };
+        });
+
+        function setLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLang = lang;
+            localStorage.setItem(LANG_KEY, lang);
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const t = translations[currentLang];
+            document.documentElement.setAttribute('lang', currentLang);
+            document.title = t.docTitle;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key] !== undefined) el.innerHTML = t[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key] !== undefined) el.placeholder = t[key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (t[key] !== undefined) { el.title = t[key]; el.setAttribute('aria-label', t[key]); }
+            });
+            document.querySelectorAll('[data-i18n-label]').forEach(el => {
+                const key = el.getAttribute('data-i18n-label');
+                if (t[key] !== undefined) el.setAttribute('data-label', t[key]);
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+            });
+
+            updateCategoryDisplay(document.getElementById('info-category').value);
+            updateHeaderPills();
+            renderParticipants();
+            renderFloors();
+            renderCustomSurveyItems();
+            refreshActiveStatusTexts();
+            document.querySelectorAll('textarea').forEach(adjustTextareaHeight);
+        }
+
         function generateReportCode(dateStr) {
             const base = (dateStr || new Date().toISOString().split('T')[0]).replace(/-/g, '');
             const rand = Math.floor(100 + Math.random() * 900);
@@ -572,16 +892,17 @@
         }
 
         function updateHeaderPills() {
+            const t = translations[currentLang];
             const codeEl = document.getElementById('header-pill-code');
             const dateEl = document.getElementById('header-pill-date');
-            if (codeEl) codeEl.textContent = `Mã BB: ${reportCode || '—'}`;
+            if (codeEl) codeEl.textContent = `${t.pillCode}: ${reportCode || '—'}`;
             if (dateEl) {
                 const dateVal = document.getElementById('info-date').value;
                 if (dateVal) {
                     const [y, m, d] = dateVal.split('-');
-                    dateEl.textContent = `Ngày: ${d}/${m}/${y}`;
+                    dateEl.textContent = `${t.pillDate}: ${d}/${m}/${y}`;
                 } else {
-                    dateEl.textContent = 'Ngày: —';
+                    dateEl.textContent = `${t.pillDate}: —`;
                 }
             }
         }
@@ -621,16 +942,17 @@
         // ============ TẦNG (DYNAMIC) ============
         function renderFloors() {
             const tbody = document.getElementById('floors-body');
+            const t = translations[currentLang];
             tbody.innerHTML = '';
             floors.forEach(f => {
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-id', f.id);
                 tr.innerHTML = `
-                    <td data-label="Tầng"><input type="text" class="data-input" value="${f.label}" oninput="updateFloor(${f.id}, 'label', this.value); startSaveTimer()"></td>
-                    <td data-label="Hợp đồng (mm)"><input type="number" inputmode="decimal" class="data-input" value="${f.hd}" oninput="updateFloor(${f.id}, 'hd', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
-                    <td data-label="Thực tế (mm)"><input type="number" inputmode="decimal" class="data-input" value="${f.tt}" oninput="updateFloor(${f.id}, 'tt', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
-                    <td data-label="Độ lệch (mm)"><span class="deviation-output dev-empty" id="floor-dev-${f.id}">—</span></td>
-                    <td class="no-print text-center" data-label="Xóa"><button onclick="removeFloor(${f.id})" class="row-delete-btn" title="Xóa tầng">✕</button></td>
+                    <td data-label="${t.thFloor}"><input type="text" class="data-input" value="${f.label}" oninput="updateFloor(${f.id}, 'label', this.value); startSaveTimer()"></td>
+                    <td data-label="${t.thContract}"><input type="number" inputmode="decimal" class="data-input" value="${f.hd}" oninput="updateFloor(${f.id}, 'hd', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
+                    <td data-label="${t.thActual}"><input type="number" inputmode="decimal" class="data-input" value="${f.tt}" oninput="updateFloor(${f.id}, 'tt', this.value); recalcFloorRow(${f.id}); startSaveTimer()"></td>
+                    <td data-label="${t.thDeviation}"><span class="deviation-output dev-empty" id="floor-dev-${f.id}">—</span></td>
+                    <td class="no-print text-center" data-label="${t.thDelete}"><button onclick="removeFloor(${f.id})" class="row-delete-btn" title="${t.deleteFloor}">✕</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -673,12 +995,13 @@
         }
 
         function addFloor() {
-            floors.push({ id: floorIdCounter++, label: `Tầng ${floors.length + 1}`, hd: '', tt: '' });
+            const t = translations[currentLang];
+            floors.push({ id: floorIdCounter++, label: `${t.floorDefaultPrefix} ${floors.length + 1}`, hd: '', tt: '' });
             renderFloors(); startSaveTimer();
         }
 
         function removeFloor(id) {
-            if (floors.length <= 1) { showSaveStatus('Phải giữ lại ít nhất một tầng.', 'error', 3000); return; }
+            if (floors.length <= 1) { showSaveStatus(translations[currentLang].keepOneFloor, 'error', 3000); return; }
             floors = floors.filter(f => f.id !== id);
             renderFloors(); startSaveTimer();
         }
@@ -690,18 +1013,27 @@
             saveTimer = setTimeout(saveState, 10000);
         }
 
+        function getActiveStatusCode(row) {
+            const btn = row.querySelector('.status-btn.active');
+            if (!btn) return null;
+            if (btn.classList.contains('pass')) return 'pass';
+            if (btn.classList.contains('fail')) return 'fail';
+            if (btn.classList.contains('na')) return 'na';
+            return null;
+        }
+
         function saveState() {
             customSurveyItems = Array.from(document.querySelectorAll('#custom-survey-body tr')).map(row => ({
                 id: parseInt(row.getAttribute('data-id')),
                 name: row.querySelector('.item-name-input').value,
                 description: row.querySelector('.description-input').value,
-                status: row.querySelector('.status-btn.active')?.getAttribute('data-state') || null,
+                status: getActiveStatusCode(row),
             }));
 
             const fixedItems = Array.from(document.querySelectorAll('tr.fixed-item-row')).map(row => ({
                 item: row.getAttribute('data-item'),
                 text: row.querySelector('textarea.data-input')?.value || '',
-                status: row.querySelector('.status-btn.active')?.getAttribute('data-state') || null,
+                status: getActiveStatusCode(row),
             }));
 
             const dimensions = {};
@@ -735,10 +1067,10 @@
 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                showSaveStatus('Đã lưu tự động!', 'success');
+                showSaveStatus(translations[currentLang].savedMsg, 'success');
             } catch (error) {
                 console.error('Lỗi khi lưu trạng thái:', error);
-                showSaveStatus('Lỗi khi lưu dữ liệu!', 'error');
+                showSaveStatus(translations[currentLang].saveErrMsg, 'error');
             }
         }
 
@@ -752,7 +1084,7 @@
                 if (saved) state = JSON.parse(saved);
             } catch (error) {
                 console.error('Lỗi khi tải trạng thái:', error);
-                showSaveStatus('Lỗi tải dữ liệu. Bắt đầu phiên mới.', 'error', 5000);
+                showSaveStatus(translations[currentLang].loadErrMsg, 'error', 5000);
             }
 
             if (!state) {
@@ -803,11 +1135,8 @@
                 const ta = row.querySelector('textarea.data-input');
                 if (ta) { ta.value = data.text || ''; adjustTextareaHeight(ta); }
                 if (data.status) {
-                    const btn = row.querySelector(`.status-btn[data-state="${data.status}"]`);
-                    if (btn) {
-                        const type = btn.classList.contains('pass') ? 'pass' : (btn.classList.contains('fail') ? 'fail' : 'na');
-                        handleSelection(btn, type, false);
-                    }
+                    const btn = row.querySelector(`.status-btn.${data.status}`);
+                    if (btn) handleSelection(btn, data.status, false);
                 }
             });
 
@@ -829,7 +1158,7 @@
             reportCode = state.reportCode || generateReportCode(state.date || today);
             updateHeaderPills();
 
-            showSaveStatus('Đã khôi phục dữ liệu!', 'success', 3000);
+            showSaveStatus(translations[currentLang].restoredMsg, 'success', 3000);
         }
 
         function showSaveStatus(message, type = 'success', duration = 2000) {
@@ -848,10 +1177,10 @@
             let isValid = true;
             const errors = [];
             const requiredFields = [
-                { id: 'info-project-name', name: 'Tên Công trình' },
-                { id: 'info-address', name: 'Địa chỉ' },
-                { id: 'info-date', name: 'Ngày khảo sát' },
-                { id: 'conclusion-summary', name: 'Kết luận Tổng thể (III.1)' },
+                { id: 'info-project-name', name: translations[currentLang].fieldProjectName },
+                { id: 'info-address', name: translations[currentLang].fieldAddress },
+                { id: 'info-date', name: translations[currentLang].fieldDate },
+                { id: 'conclusion-summary', name: translations[currentLang].fieldSummary },
             ];
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
             requiredFields.forEach(field => {
@@ -863,19 +1192,20 @@
                     if (errors.length === 1) element.focus();
                 }
             });
-            if (!isValid) showSaveStatus(`Vui lòng điền đầy đủ: ${errors.join(', ')}`, 'error', 8000);
+            if (!isValid) showSaveStatus(`${translations[currentLang].validatePrefix} ${errors.join(', ')}`, 'error', 8000);
             return isValid;
         }
 
         function handlePrintClick() {
             if (!validateBeforePrint()) return;
             window.print();
-            if (isIOS()) showSaveStatus('Trên iOS: chọn "Lưu vào Tệp" (Save to Files) để tạo PDF.', 'success', 7000);
+            if (isIOS()) showSaveStatus(translations[currentLang].iosPrintMsg, 'success', 7000);
         }
 
         // ============ UTILITY ============
-        function updateCategoryDisplay(selectedValue) {
-            document.getElementById('info-category-display').textContent = selectedValue;
+        function updateCategoryDisplay(code) {
+            const t = translations[currentLang];
+            document.getElementById('info-category-display').textContent = t.categoryLabels[code] || '';
         }
 
         function adjustTextareaHeight(textarea) {
@@ -887,12 +1217,13 @@
         function renderParticipants() {
             const tbody = document.getElementById('participants-body');
             if (!tbody) return;
+            const t = translations[currentLang];
             tbody.innerHTML = '';
             const participantsA = participants.filter(p => p.type === 'A');
             const participantsB = participants.filter(p => p.type === 'B');
             const defaultPlaceholder = (type) => ({
-                name: type === 'A' ? 'Ví dụ: Nguyễn Văn A' : 'Ví dụ: Trần Thị B',
-                role: type === 'A' ? 'Chủ Nhà/Đại diện CĐT' : 'CBKT Thang máy',
+                name: type === 'A' ? t.namePhA : t.namePhB,
+                role: type === 'A' ? t.rolePhA : t.rolePhB,
             });
             const createParticipantRow = (p) => {
                 const row = document.createElement('tr');
@@ -900,23 +1231,23 @@
                 const placeholder = defaultPlaceholder(p.type);
                 const inputHandler = `adjustTextareaHeight(this); updateParticipant(${p.id}, `;
                 row.innerHTML = `
-                    <td data-label="Họ và Tên"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.name}" oninput="${inputHandler}'name', this.value); startSaveTimer()">${p.name || ''}</textarea></td>
-                    <td data-label="Chức vụ"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.role}" oninput="${inputHandler}'role', this.value); startSaveTimer()">${p.role || ''}</textarea></td>
-                    <td class="text-center no-print" data-label="Xóa">
-                        <button onclick="removeParticipant(${p.id})" class="row-delete-btn" title="Xóa người tham dự">✕</button>
+                    <td data-label="${t.thName}"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.name}" oninput="${inputHandler}'name', this.value); startSaveTimer()">${p.name || ''}</textarea></td>
+                    <td data-label="${t.thRole}"><textarea rows="1" class="w-full data-input" placeholder="${placeholder.role}" oninput="${inputHandler}'role', this.value); startSaveTimer()">${p.role || ''}</textarea></td>
+                    <td class="text-center no-print" data-label="${t.thDelete}">
+                        <button onclick="removeParticipant(${p.id})" class="row-delete-btn" title="${t.deletePerson}">✕</button>
                     </td>
                 `;
                 return row;
             };
             if (participantsA.length > 0) {
                 const headerA = document.createElement('tr');
-                headerA.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: rgba(29,78,216,0.08); color: var(--c-primary-dark);">Đại diện Chủ đầu tư (BÊN A)</td>`;
+                headerA.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: rgba(29,78,216,0.08); color: var(--c-primary-dark);">${t.partyAHeader}</td>`;
                 tbody.appendChild(headerA);
                 participantsA.forEach(p => tbody.appendChild(createParticipantRow(p)));
             }
             if (participantsB.length > 0) {
                 const headerB = document.createElement('tr');
-                headerB.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: var(--c-bg-soft); color: var(--c-ink);">Đại diện Nhà thầu TM (BÊN B)</td>`;
+                headerB.innerHTML = `<td colspan="3" class="!p-2 font-bold text-sm" style="background: var(--c-bg-soft); color: var(--c-ink);">${t.partyBHeader}</td>`;
                 tbody.appendChild(headerB);
                 participantsB.forEach(p => tbody.appendChild(createParticipantRow(p)));
             }
@@ -933,7 +1264,7 @@
             if (idx === -1) return;
             const type = participants[idx].type;
             if (participants.filter(p => p.type === type).length <= 1) {
-                showSaveStatus('Phải giữ lại ít nhất một đại diện cho mỗi bên.', 'error', 4000);
+                showSaveStatus(translations[currentLang].keepOneParty, 'error', 4000);
                 return;
             }
             participants = participants.filter(p => p.id !== id);
@@ -949,31 +1280,29 @@
         function renderCustomSurveyItems() {
             const tbody = document.getElementById('custom-survey-body');
             if (!tbody) return;
+            const t = translations[currentLang];
             tbody.innerHTML = '';
             customSurveyItems.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', item.id);
                 const itemNumber = 8 + index;
                 row.innerHTML = `
-                    <td data-label="Hạng mục"><textarea rows="1" class="item-name-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'name', this.value);" placeholder="${itemNumber}. [Tên hạng mục tùy chỉnh]">${item.name || ''}</textarea></td>
-                    <td data-label="Tình trạng / Thực tế"><textarea rows="1" class="description-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'description', this.value);" placeholder="[Mô tả tình trạng thực tế]">${item.description || ''}</textarea></td>
-                    <td data-label="Đánh giá">
+                    <td data-label="${t.thItem}"><textarea rows="1" class="item-name-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'name', this.value);" placeholder="${itemNumber}. ${t.customItemPh}">${item.name || ''}</textarea></td>
+                    <td data-label="${t.thStatusCond}"><textarea rows="1" class="description-input data-input w-full" oninput="adjustTextareaHeight(this); startSaveTimer(); updateCustomSurveyItem(${item.id}, 'description', this.value);" placeholder="${t.customDescPh}">${item.description || ''}</textarea></td>
+                    <td data-label="${t.thStatus}">
                         <div class="status-btn-group no-print">
-                            <span class="status-btn pass" data-state="Đạt" onclick="handleSelection(this, 'pass'); startSaveTimer()">Đạt</span>
-                            <span class="status-btn fail" data-state="Không Đạt" onclick="handleSelection(this, 'fail'); startSaveTimer()">K.Đạt</span>
-                            <span class="status-btn na" data-state="K.CÓ" onclick="handleSelection(this, 'na'); startSaveTimer()">K.CÓ</span>
+                            <span class="status-btn pass" onclick="handleSelection(this, 'pass'); startSaveTimer()"><span data-i18n="statusPass">${t.statusPass}</span></span>
+                            <span class="status-btn fail" onclick="handleSelection(this, 'fail'); startSaveTimer()"><span data-i18n="statusFail">${t.statusFail}</span></span>
+                            <span class="status-btn na" onclick="handleSelection(this, 'na'); startSaveTimer()"><span data-i18n="statusNA">${t.statusNA}</span></span>
                         </div>
-                        <div class="print-status-text" style="display:none; text-align:center; font-weight:700;"></div>
-                        <button onclick="removeCustomSurveyItem(${item.id})" class="no-print text-xs mt-1" style="color: var(--c-danger);">Xóa hàng</button>
+                        <div class="print-status-text"></div>
+                        <button onclick="removeCustomSurveyItem(${item.id})" class="no-print text-xs mt-1" data-i18n="deleteRow" style="color: var(--c-danger);">${t.deleteRow}</button>
                     </td>
                 `;
                 tbody.appendChild(row);
                 if (item.status) {
-                    const button = row.querySelector(`.status-btn[data-state="${item.status}"]`);
-                    if (button) {
-                        const statusType = button.classList.contains('pass') ? 'pass' : (button.classList.contains('fail') ? 'fail' : 'na');
-                        handleSelection(button, statusType, false);
-                    }
+                    const button = row.querySelector(`.status-btn.${item.status}`);
+                    if (button) handleSelection(button, item.status, false);
                 }
             });
             tbody.querySelectorAll('textarea').forEach(adjustTextareaHeight);
@@ -995,7 +1324,7 @@
         }
 
         // ============ ĐẠT / K.ĐẠT / K.CÓ ============
-        function handleSelection(clickedButton, state, shouldSave = true) {
+        function handleSelection(clickedButton, type, shouldSave = true) {
             const row = clickedButton.closest('tr');
             if (!row) return;
             const buttons = row.querySelectorAll('.status-btn');
@@ -1008,11 +1337,24 @@
             } else {
                 clickedButton.classList.add('active');
                 if (printStatusText) {
-                    printStatusText.textContent = clickedButton.getAttribute('data-state');
-                    printStatusText.style.color = state === 'pass' ? 'var(--c-success)' : (state === 'fail' ? 'var(--c-danger)' : 'var(--c-ink)');
+                    const t = translations[currentLang];
+                    printStatusText.textContent = type === 'pass' ? t.statusPass : (type === 'fail' ? t.statusFail : t.statusNA);
+                    printStatusText.style.color = type === 'pass' ? 'var(--c-success)' : (type === 'fail' ? 'var(--c-danger)' : 'var(--c-ink)');
                 }
             }
             if (shouldSave) startSaveTimer();
+        }
+
+        function refreshActiveStatusTexts() {
+            document.querySelectorAll('.status-btn.active').forEach(btn => {
+                const type = btn.classList.contains('pass') ? 'pass' : (btn.classList.contains('fail') ? 'fail' : 'na');
+                const cell = btn.closest('td');
+                const printStatusText = cell ? cell.querySelector('.print-status-text') : null;
+                if (printStatusText) {
+                    const t = translations[currentLang];
+                    printStatusText.textContent = type === 'pass' ? t.statusPass : (type === 'fail' ? t.statusFail : t.statusNA);
+                }
+            });
         }
 
         // ============ CHỮ KÝ ============
@@ -1089,6 +1431,7 @@
         function init() {
             bindDimensionListeners();
             loadState();
+            applyTranslations();
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
