@@ -362,9 +362,16 @@
             table.grid-2col-table tr td:nth-child(5) { grid-column: 1 / -1; border-top: 1px solid var(--c-line); text-align: center; }
         }
 
+        /* Khổ A4, lề: trên/phải/dưới 5mm — trái 10mm (chừa biên hồ sơ, kẹp bìa) */
+        @page {
+            size: A4;
+            margin: 5mm 5mm 5mm 10mm;
+        }
+
         @media print {
-            body { background-color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .report-container { width: 210mm; max-width: 210mm; margin: 0; padding: 10mm; box-shadow: none !important; border-radius: 0; }
+            html, body { background-color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* @page đã lo phần lề — container chỉ chiếm đúng vùng in, không cộng dồn lề lần 2 */
+            .report-container { width: 100%; max-width: none; margin: 0; padding: 0; box-shadow: none !important; border-radius: 0; }
             .page-break-avoid-section { page-break-inside: avoid; }
             .no-print { display: none !important; }
             table.responsive-table thead { display: table-header-group !important; }
@@ -376,22 +383,48 @@
             }
             #conclusion-summary, #conclusion-actions { border: 0.5px solid #000 !important; border-radius: 4px !important; }
             table.data-table { border: 0.5px solid #cbd5e1 !important; border-radius: 0 !important; }
-            table.data-table th, table.data-table td { border-bottom: 0.5px solid #e5e7eb !important; padding: 6px 8px !important; }
+            table.data-table th, table.data-table td { border-bottom: 0.5px solid #e5e7eb !important; padding: 4px 6px !important; }
             textarea { overflow: visible !important; }
             #info-category { display: none !important; }
             #info-category-display { appearance: none; border: none !important; padding: 0 !important; font-weight: 600; min-height: unset !important; }
             .signature-table td { border: none !important; }
             .signature-table td:first-child { border-right: 0.5px dashed #d1d5db !important; }
-            .deviation-output { padding: 2px 6px !important; }
+            .deviation-output { padding: 1px 5px !important; }
             canvas { border: 0.5px solid #000 !important; }
             .print-fab { display: none !important; }
             .lang-switch { display: none !important; }
             .sub-card { border: none !important; box-shadow: none !important; padding: 0 !important; }
             .print-status-text { display: block !important; }
+
+            /* ---- Co giãn cỡ chữ/khoảng cách khi in: ưu tiên vừa 1-2 trang, không sang trang 3 ---- */
+            body { font-size: 12.5px; }
+            .report-container { font-size: 12.5px; }
+            header.mb-7 { margin-bottom: 10px !important; padding-bottom: 8px !important; }
+            h1 { font-size: 1.05rem !important; }
+            h3 { font-size: 1rem !important; margin-bottom: 8px !important; }
+            h4 { font-size: 0.85rem !important; margin-bottom: 4px !important; }
+            .mb-7 { margin-bottom: 10px !important; }
+            .mb-5 { margin-bottom: 8px !important; }
+            .mb-6, .mb-4 { margin-bottom: 8px !important; }
+            .mt-3 { margin-top: 6px !important; }
+            table.data-table th, table.data-table td, table.signature-table th, table.signature-table td { padding: 3px 6px !important; }
+            textarea, input[type="text"], input[type="number"], input[type="date"] { font-size: 11.5px !important; padding: 2px 0 !important; }
+            .header-pill { font-size: 0.62rem; padding: 2px 8px; }
+            .signature-table td[class*="h-40"], .h-40 { height: 70px !important; }
+            #conclusion-summary { min-height: 40px !important; }
+            #conclusion-actions { min-height: 55px !important; }
+            section.mb-7.p-4 { padding: 8px !important; }
+
+            /* Không ngắt trang giữa 1 dòng dữ liệu hoặc 1 khối nhỏ trong Mục II —
+               nhưng CHO PHÉP ngắt giữa các khối (kích thước/tầng, yêu cầu xây dựng,
+               nguồn điện) để nội dung không bị dồn cứng gây tràn sang trang 3. */
+            table.data-table tr { page-break-inside: avoid; }
+            .sub-card { page-break-inside: avoid; }
         }
     </style>
 </head>
 <body class="p-0 sm:p-4">
+
 
     <div class="report-container">
         <div class="lang-switch no-print" role="group" aria-label="Ngôn ngữ / Language">
@@ -461,7 +494,7 @@
             </div>
         </section>
 
-        <section class="mb-7">
+        <section class="mb-7" id="section-2-block">
             <h3 class="text-xl font-bold mb-4 border-l-4 pl-3 page-break-avoid-section" style="color: var(--c-ink); border-color: var(--c-primary);" data-i18n="section2Title">II. NỘI DUNG KHẢO SÁT GIẾNG THANG</h3>
 
             <div class="page-break-after-subsection mb-5 sub-card">
@@ -885,10 +918,14 @@
             document.querySelectorAll('textarea').forEach(adjustTextareaHeight);
         }
 
-        function generateReportCode(dateStr) {
-            const base = (dateStr || new Date().toISOString().split('T')[0]).replace(/-/g, '');
-            const rand = Math.floor(100 + Math.random() * 900);
-            return `KS-${base}-${rand}`;
+        function generateReportCode() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            return `KS-${y}${m}${d}-${hh}:${mm}`;
         }
 
         function updateHeaderPills() {
@@ -1044,6 +1081,10 @@
                 };
             });
 
+            // Mã BB cập nhật theo giờ:phút thực tế của lần lưu tự động này
+            reportCode = generateReportCode();
+            updateHeaderPills();
+
             const state = {
                 projectName: document.getElementById('info-project-name').value,
                 address: document.getElementById('info-address').value,
@@ -1094,7 +1135,7 @@
                 updateCategoryDisplay(document.getElementById('info-category').value);
                 initSignatureCanvas('signatureA');
                 initSignatureCanvas('signatureB');
-                reportCode = generateReportCode(today);
+                reportCode = generateReportCode();
                 updateHeaderPills();
                 return;
             }
@@ -1155,7 +1196,7 @@
             initSignatureCanvas('signatureA', state.signatureA);
             initSignatureCanvas('signatureB', state.signatureB);
 
-            reportCode = state.reportCode || generateReportCode(state.date || today);
+            reportCode = generateReportCode();
             updateHeaderPills();
 
             showSaveStatus(translations[currentLang].restoredMsg, 'success', 3000);
